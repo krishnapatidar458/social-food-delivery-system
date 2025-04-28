@@ -1,0 +1,25 @@
+/* Categories.css */
+
+.custom-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin-inline: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d4d4d4;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #b5b5b5;
+}
+
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d4 transparent;
+}

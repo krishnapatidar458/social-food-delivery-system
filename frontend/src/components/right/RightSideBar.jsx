@@ -3,12 +3,12 @@ import { Filter } from "lucide-react"; // import Filter icon from lucide-react
 
 const Suggestions = () => {
   return (
-    <section className="p-7 border-l-1 h-full ">
+    <section className="p-7 border-l-1 h-full  ">
       {/* Header section with Suggestions and Filter */}
       <div className="flex justify-between items-center mb-4 gap-5">
         <h2 className="text-sm font-semibold">Suggestions</h2>
 
-        <div className="flex items-center gap-1 text-sm text-gray-600 cursor-pointer hover:text-orange-500">
+        <div className="flex items-center gap-1 text-sm text-gray-600 cursor-pointer hover:text-orange-500 pr-10">
           <Filter className="w-6 h-6 bold" />
           <span className="text-gray-700 font-medium text-xl hover:text-orange-500">
             Filter
