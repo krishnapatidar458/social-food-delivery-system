@@ -1,7 +1,35 @@
-import React from "react";
-import { MapPin, Search } from "lucide-react";
+import React, { use } from "react";
+import { MapPin, Search, ShoppingCart } from "lucide-react";
+import { Avatar } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { setAuthUser } from "../../redux/authSlice";
+import { setPosts, setSelectedPost } from "../../redux/postSlice";
 
 const Header = () => {
+  const navigate = useNavigate();
+  const { user } = useSelector((store) => store.auth);
+  const dispatch = useDispatch();
+
+  const logoutHandler = async () => {
+    try {
+      const res = await axios.get("http://localhost:8000/api/v1/user/logout", {
+        withCredentials: true,
+      });
+      if (res.data.success) {
+        dispatch(setAuthUser(null));
+        dispatch(setSelectedPost(null));
+        dispatch(setPosts([]));
+        navigate("/login");
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      toast.error(error.res.data.message);
+    }
+  };
+
   return (
     <header className="w-full flex flex-col md:flex-row items-center justify-between p-4 md:px-8 bg-white shadow-md gap-4">
       {/* Left Section: Logo and Title */}
@@ -29,16 +57,23 @@ const Header = () => {
       {/* Right Section: Location and Buttons */}
       <div className="flex items-center gap-3 md:gap-6 flex-shrink-0">
         <div className="flex items-center gap-2 text-gray-600">
-          <MapPin className="w-5 h-5" />
-          <span className="text-sm md:text-base">Location</span>
+          <ShoppingCart className="cursor-pointer" />
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="px-4 py-1.5 text-sm font-semibold text-orange-500 border border-orange-500 rounded-full hover:bg-orange-500 hover:text-white transition">
-            Login
-          </button>
-          <button className="px-4 py-1.5 text-sm font-semibold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition">
-            Sign Up
+          <Link to={`/profile/${user?._id}`}>
+            <Avatar
+              alt="Remy Sharp"
+              src={user?.profilePicture}
+              className="w-2 h-3 cursor-pointer"
+            />
+          </Link>
+
+          <button
+            onClick={logoutHandler}
+            className="px-4 py-1.5 text-sm font-semibold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition"
+          >
+            Logout
           </button>
         </div>
       </div>

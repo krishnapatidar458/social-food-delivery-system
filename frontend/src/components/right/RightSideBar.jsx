@@ -1,41 +1,44 @@
 import React from "react";
-import { Filter } from "lucide-react"; // import Filter icon from lucide-react
+import { Link } from "react-router-dom";
+import { Avatar } from "@mui/material";
+import { useSelector } from "react-redux";
+import SuggestedUser from "./SuggestedUsers";
 
-const Suggestions = () => {
+import useGetSuggestedUser from "../../hooks/useGetSuggestedUser";
+
+const RightSidebar = () => {
+  const { user } = useSelector((store) => store.auth);
+  useGetSuggestedUser();
+
   return (
-    <section className="p-7 border-l-1 h-full  ">
-      {/* Header section with Suggestions and Filter */}
-      <div className="flex justify-between items-center mb-4 gap-5">
-        <h2 className="text-sm font-semibold">Suggestions</h2>
-
-        <div className="flex items-center gap-1 text-sm text-gray-600 cursor-pointer hover:text-orange-500 pr-10">
-          <Filter className="w-6 h-6 bold" />
-          <span className="text-gray-700 font-medium text-xl hover:text-orange-500">
-            Filter
-          </span>
-        </div>
-      </div>
-
-      {/* User suggestions */}
-      <div className="flex flex-col gap-4 ">
-        {[1, 2, 3, 4].map((user) => (
-          <div
-            key={user}
-            className="flex items-center gap-3 bg-gray-300 p-3 rounded-sm hover:bg-orange-100"
-          >
-            <div className="w-8 h-8 rounded-full bg-gray-400 " />
-            <span className="text-sm font-medium">User</span>
-          </div>
-        ))}
-      </div>
-      <div className="flex justify-between p-t-6 ">
+    <aside className="hidden lg:block w-full max-w-sm p-4 rounded-xl bg-white shadow-md">
+      {/* User Info */}
+      <div className="flex items-center gap-4 mb-6">
+        <Link to={`/profile/${user?._id}`}>
+          <Avatar
+            alt={user?.username}
+            src={user?.profilePicture}
+            className="w-12 h-12"
+          />
+        </Link>
         <div>
-
+          
+          <Link
+            to={`/profile/${user?._id}`}
+            className="block text-sm font-semibold text-gray-900 hover:text-black no-underline"
+          >
+            {user?.username}
+          </Link>
+          <p className="text-gray-500 text-xs truncate w-44">
+            {user?.bio || "No bio available"}
+          </p>
         </div>
-        <button className="justify-end p-t-3  text-blue-600 rounded-sm hover:text-blue-800 hover:border-b-2 p-b-1">view all</button>
       </div>
-    </section>
+
+      {/* Suggested Users */}
+      <SuggestedUser />
+    </aside>
   );
 };
 
-export default Suggestions;
+export default RightSidebar;
