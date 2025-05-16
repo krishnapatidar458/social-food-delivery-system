@@ -31,6 +31,10 @@ const postSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  quantity:{
+    type: Number,
+    default: 1,
+  },
   comments: [
     {
       type: mongoose.Schema.Types.ObjectId,

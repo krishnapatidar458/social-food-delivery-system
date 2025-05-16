@@ -5,6 +5,7 @@ import {
   bookMarkPost,
   deletePost,
   dislikePost,
+ 
   getAllPost,
   getCommentsOfPost,
   getUserPost,
@@ -25,5 +26,6 @@ router.route("/:id/comment").post(isAuthenticated, addComment);
 router.route("/:id/comment/all").post(isAuthenticated, getCommentsOfPost);
 router.route("/:id/bookmark").get(isAuthenticated, bookMarkPost);
 router.route("/delete/:id").delete(isAuthenticated, deletePost);
+
 
 export default router;

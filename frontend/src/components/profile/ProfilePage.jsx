@@ -1,18 +1,21 @@
 import { Avatar, Button } from "@mui/material";
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import useGetUserProfile from "../../hooks/useGetUserProfile";
 import { Heart, MessageCircle } from "lucide-react";
+import { followOrUnfollow } from "../../redux/userSlice";
 
 const ProfilePage = ({ userProfile }) => {
+  const [reload, setReload] = useState(false);
   const { id: userId } = useParams();
-  useGetUserProfile(userId);
+  const navigate = useNavigate();
+  useGetUserProfile(userId );
   const [activeTab, setActiveTab] = useState("posts");
   const { user } = useSelector((store) => store.auth);
+   // trigger refetch
 
   const isLoggedInUserProfile = user?._id === userProfile?._id;
-  const isFollowing = false;
 
   const displayedPost =
     activeTab === "posts" ? userProfile?.posts : userProfile?.bookmarks;
@@ -33,6 +36,17 @@ const ProfilePage = ({ userProfile }) => {
       </div>
     );
   }
+
+  const dispatch = useDispatch();
+  const { followings, loading } = useSelector((store) => store.user);
+
+  const isFollowing = followings.includes(userProfile?._id);
+
+  const handleFollowClick = () => {
+    
+    dispatch(followOrUnfollow(userProfile?._id));
+    
+  };
 
   return (
     <div className="flex max-w-5xl justify-center mx-auto p-4 sm:p-8">
@@ -79,8 +93,10 @@ const ProfilePage = ({ userProfile }) => {
               ) : isFollowing ? (
                 <>
                   <Button
+                    onClick={handleFollowClick}
+                    disabled={loading}
                     variant="contained"
-                    color="primary"
+                    color="secondaty"
                     className=" sm:w-auto mb-3"
                   >
                     Unfollow
@@ -95,6 +111,8 @@ const ProfilePage = ({ userProfile }) => {
                 </>
               ) : (
                 <Button
+                  onClick={handleFollowClick}
+                  disabled={loading}
                   variant="contained"
                   color="primary"
                   className=" sm:w-auto mb-3"
@@ -112,7 +130,7 @@ const ProfilePage = ({ userProfile }) => {
                 <strong>{userProfile?.followers?.length}</strong> followers
               </p>
               <p>
-                <strong>{userProfile?.following?.length}</strong> following
+                <strong>{userProfile?.followings?.length}</strong> followings
               </p>
             </div>
 

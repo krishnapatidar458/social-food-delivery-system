@@ -203,6 +203,30 @@ export const getSuggestedUsers = async (req, res) => {
   }
 };
 
+// GET /api/v1/user/followings
+export const getFollowings = async (req, res) => {
+  try {
+    const user = await User.findById(req.id).select("followings");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      followings: user.followings,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+
+
 export const followOrUnfollow = async (req, res) => {
   try {
     const followKrneWala = req.id;

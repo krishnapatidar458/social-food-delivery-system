@@ -1,233 +1,200 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FiHeart, FiMessageCircle, FiSend } from "react-icons/fi"; // Outline Icons
-import { FcLike } from "react-icons/fc"; // Filled Heart Icon
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Avatar,
-  Chip,
-  Badge,
-} from "@mui/material";
+import { FiHeart, FiMessageCircle, FiSend } from "react-icons/fi";
+import { FcLike } from "react-icons/fc";
+import { Avatar, Badge, Menu, MenuItem } from "@mui/material";
 import CommentDialog from "../comment/CommentDialog";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { setPosts, setSelectedPost } from "../../redux/postSlice";
+import {
+  addToCart,
+  decreaseQuantity,
+  increaseQuantity,
+  removeFromCart,
+} from "../../redux/cartSlice";
+import { setLikeNotification } from "../../redux/rtnSlice";
 
 const PostCard = ({ post }) => {
-  const [showOptions, setShowOptions] = useState(false);
-  const [liked, setLiked] = useState(false); // Updated: State for liked/unliked
-  const optionsRef = useRef();
-  const [openDialog, setOpenDialog] = useState(false);
-  const [comment, setComment] = useState(post.comments);
-  const [text, setText] = useState("");
   const { user } = useSelector((store) => store.auth);
-  const { posts } = useSelector((store) => store.post);
-  const [open, setOpen] = useState(false);
-  const [likes, setLikes] = useState(post.likes.includes(user?._id) || false);
-  const [postLike, setPostLike] = useState(post.likes.length);
+  const [liked, setLiked] = useState(post.likes.includes(user?._id));
+  const [likeCount, setLikeCount] = useState(post.likes.length);
+  const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState(post.comments);
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const { posts } = useSelector((store) => store.post);
+  const { cartItems } = useSelector((store) => store.cart);
 
-  const changeEventHandler = (e) => {
-    const inputText = e.target.value;
-    if (inputText.trim()) {
-      setText(inputText);
-    } else {
-      setText("");
+  const handleLike = async () => {
+    try {
+      const action = liked ? "dislike" : "like";
+      const res = await axios.get(
+        `http://localhost:8000/api/v1/post/${post._id}/${action}`,
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        const updatedLikes = liked
+          ? post.likes.filter((id) => id !== user._id)
+          : [...post.likes, user._id];
+
+        const updatedPosts = posts.map((p) =>
+          p._id === post._id ? { ...p, likes: updatedLikes } : p
+        );
+
+        dispatch(setPosts(updatedPosts));
+
+        setLiked(!liked);
+        
+        setLikeCount(updatedLikes.length);
+        dispatch(
+          setLikeNotification({
+            type: "like",
+            user: user.username,
+            postId: post._id,
+            time: Date.now(),
+          })
+        );
+        
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Error updating like.");
     }
   };
 
-  const commmentHandler = async () => {
+  const handleComment = async () => {
+    if (!commentText.trim()) return;
+
     try {
       const res = await axios.post(
         `http://localhost:8000/api/v1/post/${post._id}/comment`,
-        { text },
+        { text: commentText },
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           withCredentials: true,
         }
       );
-      if (res.data.success) {
-        const updatedCommentData = [...comment, res.data.comment];
-        setComment(updatedCommentData);
 
-        const updatedPostData = posts.map((p) =>
-          p._id === post._id ? { ...p, comments: updatedCommentData } : p
+      if (res.data.success) {
+        const updatedComments = [...comments, res.data.comment];
+        setComments(updatedComments);
+        setCommentText("");
+
+        const updatedPosts = posts.map((p) =>
+          p._id === post._id ? { ...p, comments: updatedComments } : p
         );
-        dispatch(setPosts(updatedPostData));
-        toast.success(res.data.message);
-        setText("");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const likeOrDislikeHandler = async (postId) => {
-    try {
-      const action = likes ? "dislike" : "like";
-      const res = await axios.get(
-        `http://localhost:8000/api/v1/post/${postId}/${action}`,
-        {
-          withCredentials: true,
-        }
-      );
-      if (res.data.success) {
-        const updatedLikes = likes ? postLike - 1 : postLike + 1;
-        setPostLike(updatedLikes);
-        setLikes(!likes);
-        const updatedPostData = posts.map((p) => {
-          return p._id === post._id
-            ? {
-                ...p,
-                likes: likes
-                  ? p.likes.filter((id) => id !== user._id)
-                  : [...p.likes, user._id],
-              }
-            : p;
-        });
-        dispatch(setPosts(updatedPostData));
+        dispatch(setPosts(updatedPosts));
         toast.success(res.data.message);
       }
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message || "Comment failed.");
     }
   };
 
-  const handleOpenDialog = () => setOpenDialog(true);
-  const handleCloseDialog = () => setOpenDialog(false);
-
-  const handleToggleOptions = () => {
-    setShowOptions((prev) => !prev);
-  };
-
-  const handleClickOutside = (e) => {
-    if (optionsRef.current && !optionsRef.current.contains(e.target)) {
-      setShowOptions(false);
-    }
-  };
-
-  const deletePostHandler = async () => {
+  const handleDeletePost = async () => {
     try {
       const res = await axios.delete(
         `http://localhost:8000/api/v1/post/delete/${post._id}`,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
+
       if (res.data.success) {
-        const updatedPostData = posts.filter(
-          (postItem) => postItem?._id !== post?._id
-        );
-        dispatch(setPosts(updatedPostData));
-        toast.success(res.data.message, {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        const updatedPosts = posts.filter((p) => p._id !== post._id);
+        dispatch(setPosts(updatedPosts));
+
+        // Remove from cart if present
+        dispatch(removeFromCart(post._id));
+
+        toast.success(res.data.message);
       }
     } catch (error) {
-      toast.success(error.response.data.message);
+      toast.error(error?.response?.data?.message || "Deletion failed.");
     }
   };
 
-  useEffect(() => {
-    if (showOptions) {
-      document.addEventListener("click", handleClickOutside);
-    } else {
-      document.removeEventListener("click", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
+  const addToCartHandler = () => {
+    const cartItem = {
+      _id: post._id,
+      name: post.caption,
+      image: post.image,
+      quantity: post.quantity,
+      video: post.video,
+      price: post.price,
     };
-  }, [showOptions]);
 
-  // Handle like button click
+    dispatch(addToCart(cartItem));
+    toast.success("Added to cart");
+  };
+
+  const handleMenuOpen = (e) => setMenuAnchor(e.currentTarget);
+  const handleMenuClose = () => setMenuAnchor(null);
 
   return (
-    <div className="relative bg-white rounded-xl shadow-lg overflow-hidden mb-6 max-w-md lg:max-w-2xl xl:max-w-3xl mx-auto">
-      {/* {user?._id === post.author._id && setInvisible(true)} */}
-
+    <div className="relative bg-white rounded-xl shadow-lg overflow-hidden mb-6 max-w-2xl mx-auto">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
-          <Link to={`/profile/${user?._id}`}>
+          <Link to={`/profile/${post.author?._id}`}>
             {post.author?._id === user?._id ? (
-              <Badge color="primary" variant="dot" >
+              <Badge color="primary" variant="dot">
                 <Avatar
-                  alt="Remy Sharp"
-                  src={post.author?.userProfile}
-                  className="w-13 h-13 rounded-full object-cover"
+                  alt="User"
+                  src={post?.author?.profilePicture}
+                  className="w-13 h-13"
                 />
               </Badge>
             ) : (
               <Avatar
-                alt="Remy Sharp"
-                src={post.author?.userProfile}
-                className="w-13 h-13 rounded-full object-cover"
+                alt="User"
+                src={post?.author?.profilePicture}
+                className="w-13 h-13"
               />
             )}
           </Link>
 
           <div>
             <h4
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate(`/profile/${post.author._id}`)}
               className="font-semibold text-gray-800 cursor-pointer"
             >
-              {post.author?.username}
+              {post.author.username}
             </h4>
-
             <p className="text-sm text-gray-500">
               {post.location} • {post.distance} km
             </p>
           </div>
         </div>
-        <div className="relative">
-          <div>
-            <button
-              onClick={handleOpenDialog}
-              className="text-gray-600 hover:text-gray-900 transition text-2xl"
-            >
-              ⋮
-            </button>
-
-            <Dialog open={openDialog} onClose={handleCloseDialog}>
-              <DialogContent dividers>
-                <Button fullWidth onClick={handleCloseDialog}>
-                  Share
-                </Button>
-                <Button fullWidth onClick={handleCloseDialog}>
-                  Add to Favorite
-                </Button>
-                {user && user?._id === post?.author._id && (
-                  <Button fullWidth onClick={deletePostHandler}>
-                    Delete
-                  </Button>
-                )}
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {/* Options Dialog */}
+        <div>
+          <button
+            onClick={handleMenuOpen}
+            className="text-gray-600 hover:text-gray-900 transition text-2xl"
+          >
+            ⋮
+          </button>
+          <Menu
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={handleMenuClose}>Share</MenuItem>
+            <MenuItem onClick={handleMenuClose}>Add to Favorites</MenuItem>
+            {user?._id === post.author._id && (
+              <MenuItem onClick={handleDeletePost}>Delete</MenuItem>
+            )}
+          </Menu>
         </div>
       </div>
-      {/* Post Image or Video */}
+
       <div className="w-full h-72 bg-gray-100 flex items-center justify-center overflow-hidden">
-        {post?.mediaType === "video" ? (
+        {post.mediaType === "video" ? (
           <video
-            src={post?.video}
+            src={post.video}
             controls
             autoPlay
             loop
@@ -235,75 +202,104 @@ const PostCard = ({ post }) => {
           />
         ) : (
           <img
-            src={post?.image}
+            src={post.image}
             alt="Post"
             className="w-full h-full object-cover"
           />
         )}
       </div>
-      {/* Caption, Rating, and Price */}
+
       <div className="p-4">
         <p className="text-gray-800 mb-2">{post.caption}</p>
+
         <div className="flex items-center justify-between mb-2">
           <p className="text-yellow-500 font-bold">
             {"⭐".repeat(post.ratings)}
           </p>
-          <button className="px-3 py-1 text-sm bg-red-100 text-red-500 rounded-md hover:bg-red-200">
-            {post.price} rs
-          </button>
+
+          {post.quantity > 0 ? (
+            cartItems.some((item) => item._id === post._id) ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => dispatch(decreaseQuantity({ _id: post._id }))}
+                  className="bg-red-200 px-2 rounded-md text-lg"
+                >
+                  -
+                </button>
+                <span>
+                  {cartItems.find((item) => item._id === post._id)?.quantity ||
+                    0}
+                </span>
+                <button
+                  onClick={() => dispatch(increaseQuantity({ _id: post._id }))}
+                  className="bg-green-200 px-2 rounded-md text-lg"
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={addToCartHandler}
+                className="px-3 py-1 text-sm bg-red-100 text-red-500 rounded-md hover:bg-red-200"
+              >
+                Add ₹{post.price}
+              </button>
+            )
+          ) : (
+            <span className="text-gray-400 italic">Out of stock</span>
+          )}
         </div>
 
-        {/* Like, Comment, Share Icons */}
         <div className="flex items-center gap-6 text-gray-600 text-xl">
-          {/* Like button */}
-          <button
-            onClick={() => likeOrDislikeHandler(post._id)}
-            className="transition cursor-pointer"
-          >
-            {likes ? <FcLike className="text-2xl" /> : <FiHeart />}
+          <button onClick={handleLike} className="transition cursor-pointer">
+            {liked ? <FcLike className="text-2xl" /> : <FiHeart />}
           </button>
 
-          {/* Comment button */}
           <button
             onClick={() => {
               dispatch(setSelectedPost(post));
-              setOpen(true);
+              setCommentDialogOpen(true);
             }}
             className="hover:text-blue-500 transition cursor-pointer"
           >
             <FiMessageCircle />
           </button>
 
-          {/* Share button */}
           <button className="hover:text-green-500 transition cursor-pointer">
             <FiSend />
           </button>
         </div>
-        <span className="font-md block my-2">{postLike} likes</span>
-        {comment.length > 0 && (
+
+        <span className="font-md block my-2">{likeCount} likes</span>
+        {comments.length > 0 && (
           <span
             onClick={() => {
               dispatch(setSelectedPost(post));
-              setOpen(true);
+              setCommentDialogOpen(true);
             }}
             className="hover:text-blue-300 cursor-pointer"
           >
-            view all {comment.length} comments
+            View all {comments.length} comments
           </span>
         )}
 
-        <CommentDialog open={open} setOpen={setOpen} post={post} />
-        <div className="flex item-center justify-between">
+        <CommentDialog
+          open={commentDialogOpen}
+          setOpen={setCommentDialogOpen}
+          post={post}
+        />
+
+        <div className="flex item-center justify-between mt-2">
           <input
             type="text"
             placeholder="Add a comment..."
             className="outline-none text-sm w-full"
-            value={text}
-            onChange={changeEventHandler}
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
           />
-          {text && (
+          {commentText.trim() && (
             <span
-              onClick={commmentHandler}
+              onClick={handleComment}
               className="text-[#3BADF8] cursor-pointer"
             >
               Post

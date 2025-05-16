@@ -4,7 +4,7 @@ const categorySlice=createSlice({
     name:"category",
     initialState:{
         categories:[],
-        selectedCategory:"All",
+        selectedCategory:null,
     },
     reducers:{
         setCategories:(state,action)=>{

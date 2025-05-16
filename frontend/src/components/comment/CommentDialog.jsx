@@ -103,7 +103,7 @@ const CommentDialog = ({ open, setOpen, post }) => {
               <div className="flex items-center gap-2">
                 <Link to="/profile">
                   <Avatar
-                    src={selectedPost?.author?.userProfile}
+                    src={selectedPost?.author?.profilePicture}
                     alt={selectedPost?.author?.username}
                   />
                 </Link>

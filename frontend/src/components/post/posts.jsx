@@ -1,8 +1,10 @@
 import React from 'react'
 import PostCard from './PostCard'
+import { useSelector } from 'react-redux'
 
-const posts = ({posts, category}) => {
-  console.log(posts)
+const posts = ({posts}) => {
+  
+  
   return (
     <div>
       {posts.map((post) => {
