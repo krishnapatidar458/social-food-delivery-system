@@ -3,20 +3,17 @@ import { Button, Input } from "@mui/material";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader, Loader2 } from "lucide-react";
-import { setAuthUser } from "../../redux/authSlice";
-import { useDispatch } from "react-redux";
+import { Loader2 } from "lucide-react";
 
 
-const Login = () => {
+const Signup = () => {
   const [input, setInput] = useState({
-   
+    username: "",
     email: "",
     password: "",
   });
-  const navigate=useNavigate();
   const [loading, setLoading] = useState(false);
-  const dispatch=useDispatch();
+  const navigate=useNavigate();
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -26,7 +23,7 @@ const Login = () => {
     try{
       setLoading(true)
         const res = await axios.post(
-          "http://localhost:8000/api/v1/user/login",
+          "http://localhost:8000/api/v1/user/register",
           input,
           {
             headers: {
@@ -37,11 +34,10 @@ const Login = () => {
         );
         console.log(res.data);
         if(res.data.success){
-          dispatch(setAuthUser(res.data.user))
-            navigate("/")
+          navigate("/login")
             toast.success(res.data.message)
             setInput({
-              
+              username:"",
               email:"",
               password:""
             })
@@ -63,9 +59,18 @@ const Login = () => {
       >
         <div className="my-4">
           <h1 className="text-center font-bold text-xl">LOGO</h1>
-          <p className="text-sm text-center">login to see photos </p>
+          <p className="text-sm text-center">signup to see photos </p>
         </div>
-
+        <div>
+          <div className="text-blue-700">UserName</div>
+          <Input
+            type="text"
+            name="username"
+            value={input.username}
+            onChange={changeEventHandler}
+            className="focus-visible:ring-transparent mx-2 "
+          />
+        </div>
         <div>
           <div className="text-blue-700">Email</div>
           <Input
@@ -86,25 +91,24 @@ const Login = () => {
             className="focus-visible:ring-transparent mx-2"
           />
         </div>
-        {
-            loading ? (
-                <Button >
-                <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
-                </Button>
-            ) : (
-                <Button type="submit">Login</Button>
-            )
-        }
-        
-        <div className="text-center">
-          Doesn't have an account?{" "}
-          <Link to="/signup" className="text-blue-600">
-            Signup
-          </Link>
-        </div>
+        <>
+          {loading ? (
+            <Button>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            </Button>
+          ) : (
+            <Button type="submit">Login</Button>
+          )}
+          <div className="text-center">
+            Already have an account?{" "}
+            <Link to="/login" className="text-blue-600">
+              Login
+            </Link>
+          </div>
+        </>
       </form>
     </div>
   );
 };
 
-export default Login;
+export default Signup;
