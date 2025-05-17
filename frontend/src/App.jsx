@@ -78,7 +78,40 @@ const browserRouter = createBrowserRouter([
 const App = () => {
   const { user } = useSelector((store) => store.auth);
   const { connected } = useSelector((store) => store.socket);
+  const { unreadCounts } = useSelector((store) => store.chat); 
   const dispatch = useDispatch();
+  
+  // Detect and fix corrupted chat state
+  useEffect(() => {
+    // Check if unreadCounts is undefined, which indicates a corrupted state
+    if (unreadCounts === undefined) {
+      console.warn('Found corrupted chat state, attempting to fix...');
+      
+      // Try to repair the localStorage data
+      try {
+        // Get the current persisted state
+        const persistedState = JSON.parse(localStorage.getItem('persist:chat'));
+        if (persistedState) {
+          // Ensure unreadCounts exists in the state
+          const chatState = JSON.parse(persistedState);
+          if (!chatState.unreadCounts) {
+            chatState.unreadCounts = {};
+            persistedState.chat = JSON.stringify(chatState);
+            localStorage.setItem('persist:chat', JSON.stringify(persistedState));
+            console.log('Fixed corrupted chat state');
+            
+            // Force a page reload to apply the fixed state
+            window.location.reload();
+          }
+        }
+      } catch (error) {
+        console.error('Error fixing corrupted state, clearing chat state:', error);
+        // If unable to repair, clear the chat state completely
+        localStorage.removeItem('persist:chat');
+        window.location.reload();
+      }
+    }
+  }, [unreadCounts]);
   
   // Fetch notifications when user is logged in
   useEffect(() => {

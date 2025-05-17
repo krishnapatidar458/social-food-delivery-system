@@ -22,6 +22,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead
 } from "../../redux/rtnSlice";
+import { setSelectedUser } from "../../redux/authSlice";
 import { toast } from "react-toastify";
 
 import { 
@@ -49,7 +50,12 @@ const Leftsidebar = () => {
   const [openPost, setOpenPost] = useState(false);
   const navigate = useNavigate();
   const { user } = useSelector((store) => store.auth);
+  const { unreadCounts } = useSelector((store) => store.chat);
   const isMobile = useMediaQuery('(max-width:768px)');
+  
+  // Calculate total unread messages
+  const totalUnreadMessages = unreadCounts ? 
+    Object.values(unreadCounts).reduce((sum, count) => sum + count, 0) : 0;
  
   const createPostHandler = () => {
     setOpenPost(true);
@@ -91,6 +97,7 @@ const Leftsidebar = () => {
       <SidebarItem
         icon={<MessageCircle />}
         label="Messages"
+        badgeCount={totalUnreadMessages}
         sidebarHandler={sidebarHandler}
       />
       <SidebarItem
@@ -126,7 +133,7 @@ function TabPanel(props) {
   );
 }
 
-const SidebarItem = ({ icon, label, sidebarHandler }) => {
+const SidebarItem = ({ icon, label, badgeCount, sidebarHandler }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -173,13 +180,11 @@ const SidebarItem = ({ icon, label, sidebarHandler }) => {
   };
 
   const handleNotificationClick = (notification) => {
-    // Don't close the drawer immediately - we'll do that after navigation
-    
-    // Mark as read in the database
+    // If notification has an _id, mark it as read
     if (notification._id && !notification.read) {
       dispatch(markNotificationRead(notification._id));
     }
-    
+
     // Navigate based on notification type
     if (notification.type === 'like' || notification.type === 'comment') {
       // Handle both formats - older socket notifications vs database notifications
@@ -187,7 +192,7 @@ const SidebarItem = ({ icon, label, sidebarHandler }) => {
       if (postId) {
         console.log(`Navigating to post: ${postId}`);
         
-        // First navigate to the post, then close the drawer
+        // First navigate to the post
         navigate(`/post/${postId}`);
         
         // Close the drawer after a short delay to ensure navigation starts
@@ -250,6 +255,16 @@ const SidebarItem = ({ icon, label, sidebarHandler }) => {
       case 'follow':
         content = 'started following you';
         icon = <User size={16} className="text-green-500" />;
+        break;
+      case 'message':
+        // Message notifications should be handled in the conversations list
+        // but include handling here for any that might still appear
+        content = notification.message 
+          ? notification.message.includes('sent you a message') 
+            ? notification.message 
+            : `sent you a message: "${notification.message.substring(0, 20)}${notification.message.length > 20 ? '...' : ''}"`
+          : 'sent you a message';
+        icon = <MessageCircle size={16} className="text-purple-500" />;
         break;
       default:
         content = notification.message || 'interacted with you';
@@ -315,11 +330,13 @@ const SidebarItem = ({ icon, label, sidebarHandler }) => {
     );
   };
 
-  // Combine and sort all notifications for the "All" tab
+  // Filter out message notifications from the allNotifications array
   const allNotifications = [
     ...(Array.isArray(notifications) ? notifications : []), 
     ...(Array.isArray(realtimeNotifications) ? realtimeNotifications : [])
-  ].sort((a, b) => new Date(b.createdAt || Date.now()) - new Date(a.createdAt || Date.now()));
+  ]
+  .filter(notification => notification.type !== 'message') // Filter out message notifications
+  .sort((a, b) => new Date(b.createdAt || Date.now()) - new Date(a.createdAt || Date.now()));
 
   // Filter by type for the other tabs
   const followNotifications = allNotifications.filter(n => n.type === 'follow');
@@ -511,6 +528,19 @@ const SidebarItem = ({ icon, label, sidebarHandler }) => {
             </SwipeableDrawer>
           )}
 
+          <span className="text-gray-700 text-sm hidden lg:inline">
+            {label}
+          </span>
+        </>
+      ) : label === "Messages" ? (
+        <>
+          <Badge
+            badgeContent={badgeCount > 0 ? badgeCount : null}
+            color="primary"
+            onClick={(e) => e.stopPropagation()} // Prevent parent div click from triggering twice
+          >
+            <div className="text-gray-700">{icon}</div>
+          </Badge>
           <span className="text-gray-700 text-sm hidden lg:inline">
             {label}
           </span>

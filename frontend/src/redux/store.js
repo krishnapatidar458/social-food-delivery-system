@@ -26,6 +26,26 @@ const persistConfig = {
   // Don't persist socket state to avoid serialization issues
   blacklist: ['socket'],
 };
+
+// Separate config for chat slice to properly handle the sensitive parts
+const chatPersistConfig = {
+  key: 'chat',
+  storage,
+  // Ensure we have proper structures on rehydration
+  migrate: (state) => {
+    // If the state is invalid or missing fields, return the default structure
+    if (!state || !state.unreadCounts) {
+      return {
+        ...state,
+        onlineUsers: state?.onlineUsers || [],
+        messages: state?.messages || [],
+        unreadCounts: {}
+      };
+    }
+    return state;
+  }
+};
+
 const rootReducer = combineReducers({
   auth: authSlice,
   post: postSlice,
@@ -33,7 +53,7 @@ const rootReducer = combineReducers({
   user: userSlice,
   cart: cartSlice,
   socket: socketSlice,
-  chat: chatSlice,
+  chat: persistReducer(chatPersistConfig, chatSlice),
   realTimeNotification: rtnSlice,
 });
 const persistedReducer = persistReducer(persistConfig, rootReducer);

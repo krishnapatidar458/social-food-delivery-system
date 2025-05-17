@@ -43,6 +43,17 @@ io.on("connection", (socket) => {
       }
     });
     
+    // Handle message read status
+    socket.on("markMessagesRead", (data) => {
+      const senderSocketId = getReceiverSocketId(data.senderId);
+      if (senderSocketId) {
+        io.to(senderSocketId).emit("messagesRead", {
+          from: userId,
+          to: data.senderId
+        });
+      }
+    });
+    
     // Handle notification read status
     socket.on("markNotificationsRead", (userId) => {
       socket.broadcast.emit("notificationsRead", userId);

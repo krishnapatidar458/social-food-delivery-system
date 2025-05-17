@@ -13,7 +13,7 @@ const ChatRightSideBar = () => {
   const dispatch = useDispatch();
   const { onlineUsers } = useSelector((store) => store.chat);
   return (
-    <div className=" hidden lg:block w-full max-w-sm p-4 rounded-xl bg-white shadow-md">
+    <div className=" hidden lg:block w-full  h-[70vh] max-w-sm p-4 rounded-xl bg-white shadow-md">
       <section>
         <div className="flex gap-2">
           <div className="   hover:bg-gray-100 cursor-pointer rounded-full p-2  ">
