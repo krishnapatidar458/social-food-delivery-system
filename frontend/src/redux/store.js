@@ -23,6 +23,8 @@ const persistConfig = {
   key: "root",
   storage,
   version: 1,
+  // Don't persist socket state to avoid serialization issues
+  blacklist: ['socket'],
 };
 const rootReducer = combineReducers({
   auth: authSlice,
@@ -41,7 +43,18 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        ignoredActions: [
+          FLUSH, 
+          REHYDRATE, 
+          PAUSE, 
+          PERSIST, 
+          PURGE, 
+          REGISTER,
+          // Ignore socket connection actions
+          'socketio/setSocketConnected',
+        ],
+        // Ignore non-serializable data in these paths
+        ignoredPaths: ['socket'],
       },
     }),
 });

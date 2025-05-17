@@ -5,6 +5,7 @@ import {
   getFollowings,
   getProfile,
   getSuggestedUsers,
+  getUserStats,
   login,
   logout,
   register,
@@ -23,5 +24,6 @@ router
 router.route("/suggested").get(isAuthenticated, getSuggestedUsers);
 router.route("/followorunfollow/:id").post(isAuthenticated, followOrUnfollow);
 router.route("/followings").get(isAuthenticated, getFollowings);
+router.route("/stats/:id").get(isAuthenticated, getUserStats);
 
 export default router;

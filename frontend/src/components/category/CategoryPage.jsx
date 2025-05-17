@@ -1,21 +1,18 @@
-import React from 'react'
-import { useParams } from 'react-router-dom';
-import Category from './Category'
-import Posts from '../post/posts'
-import { useSelector } from 'react-redux';
-import CategoryPosts from './CategoryPosts';
+import React from "react";
+import PostCard from "../post/PostCard";
 
-const CategoryPage = () => {
-    
-    const params=useParams();
-    const category=params.category;
-    const { posts } = useSelector((state) => state.post);
+const CategoryPosts = ({ posts, category }) => {
+  const filteredPosts = category
+    ? posts.filter((post) => post.category === category)
+    : posts;
+
   return (
-    <main className="flex-1 lg:w-[250px] md:w-[400px] bg-gray-50 p-4 rounded-lg shadow-md">
-      <Category />
-      <CategoryPosts posts={posts} category={category} />
-    </main>
+    <div>
+      {filteredPosts.map((post) => (
+        <PostCard key={post._id} post={post} />
+      ))}
+    </div>
   );
-}
+};
 
-export default CategoryPage
+export default CategoryPosts;

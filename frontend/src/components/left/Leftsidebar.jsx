@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Home,
   MessageCircle,
@@ -7,22 +7,50 @@ import {
   User,
   Heart,
   PlusSquare,
+  Check,
+  Trash2,
+  X,
 } from "lucide-react";
 import CreatePost from "../post/CreatePost";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import moment from "moment"; // npm install moment
-import { clearNotifications, markNotificationsSeen } from "../../redux/rtnSlice";
+import { 
+  clearNotifications, 
+  markNotificationsSeen, 
+  fetchNotifications,
+  markAllNotificationsRead,
+  markNotificationRead
+} from "../../redux/rtnSlice";
+import { toast } from "react-toastify";
 
-import { Avatar, Badge, Popover, Typography } from "@mui/material";
+import { 
+  Avatar, 
+  Badge, 
+  Popover, 
+  Typography, 
+  Box, 
+  Tab, 
+  Tabs,
+  Button,
+  IconButton,
+  Divider,
+  CircularProgress,
+  useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  SwipeableDrawer
+} from "@mui/material";
 
 
 const Leftsidebar = () => {
   const [openPost, setOpenPost] = useState(false);
   const navigate = useNavigate();
   const { user } = useSelector((store) => store.auth);
+  const isMobile = useMediaQuery('(max-width:768px)');
  
-
   const createPostHandler = () => {
     setOpenPost(true);
   };
@@ -39,7 +67,7 @@ const Leftsidebar = () => {
   };
 
   return (
-    <nav className="flex md:flex-col relative items-center md:items-start gap-4 w-full border-r-1 h-full  max-sm:border-hidden sm:p-4">
+    <nav className="flex md:flex-col relative items-center md:items-start gap-4 w-full border-r-1 h-full max-sm:border-hidden sm:p-4">
       <SidebarItem
         icon={<Home />}
         label="Home"
@@ -50,13 +78,11 @@ const Leftsidebar = () => {
         label="Notifications"
         sidebarHandler={sidebarHandler}
       />
-
       <SidebarItem
         icon={<PlusSquare />}
         label="Post"
         sidebarHandler={sidebarHandler}
       />
-
       <SidebarItem
         icon={<Heart />}
         label="Favorites"
@@ -77,36 +103,315 @@ const Leftsidebar = () => {
   );
 };
 
-const SidebarItem = ({ icon, label, sidebarHandler }) => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const { likeNotification } = useSelector(
-    (store) => store.realTimeNotification
-  );
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const unseenCount = likeNotification.filter((n) => !n.seen).length;
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-    if (unseenCount > 0) {
-      dispatch(markNotificationsSeen()); // Mark as seen when popover opens
-    }
-  };
-
-  const handleClose = () => setAnchorEl(null);
-
-  const handleNotificationClick = (postId) => {
-    navigate(`/post/${postId}`);
-    handleClose();
-  };
-
-  const open = Boolean(anchorEl);
-  const id = open ? "simple-popover" : undefined;
+// Custom tab panel for notification types
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+  const isMobile = useMediaQuery('(max-width:768px)');
 
   return (
     <div
-      onClick={() => label !== "Notifications" && sidebarHandler(label)}
+      role="tabpanel"
+      hidden={value !== index}
+      id={`notification-tabpanel-${index}`}
+      aria-labelledby={`notification-tab-${index}`}
+      className={value === index ? 'block' : 'hidden'}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 0, overflowY: 'auto', maxHeight: isMobile ? '60vh' : '300px' }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
+const SidebarItem = ({ icon, label, sidebarHandler }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [tabValue, setTabValue] = useState(0);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const isMobile = useMediaQuery('(max-width:768px)');
+  const buttonRef = useRef(null);
+  
+  const { 
+    notifications, 
+    realtimeNotifications, 
+    unseenCount,
+    loading 
+  } = useSelector((store) => store.realTimeNotification);
+  
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  const handleClick = (event) => {
+    if (label === "Notifications") {
+      // Toggle the notification panel state
+      if (isMobile) {
+        setIsDrawerOpen(!isDrawerOpen);
+      } else {
+        setAnchorEl(anchorEl ? null : event.currentTarget);
+      }
+      
+      if (unseenCount > 0) {
+        dispatch(markNotificationsSeen());
+      }
+      
+      // Refresh notifications when opening the panel
+      dispatch(fetchNotifications());
+    } else {
+      sidebarHandler(label);
+    }
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+    setIsDrawerOpen(false);
+  };
+
+  const handleNotificationClick = (notification) => {
+    // Don't close the drawer immediately - we'll do that after navigation
+    
+    // Mark as read in the database
+    if (notification._id && !notification.read) {
+      dispatch(markNotificationRead(notification._id));
+    }
+    
+    // Navigate based on notification type
+    if (notification.type === 'like' || notification.type === 'comment') {
+      // Handle both formats - older socket notifications vs database notifications
+      const postId = notification.post || notification.postId;
+      if (postId) {
+        console.log(`Navigating to post: ${postId}`);
+        
+        // First navigate to the post, then close the drawer
+        navigate(`/post/${postId}`);
+        
+        // Close the drawer after a short delay to ensure navigation starts
+        setTimeout(() => {
+          handleClose();
+        }, 300);
+      } else {
+        console.error("No post ID found in notification:", notification);
+        toast.error("Could not find the referenced post");
+      }
+    } else if (notification.type === 'follow') {
+      // Handle both formats
+      const senderId = notification.sender?._id || notification.sender || notification.userId;
+      if (senderId) {
+        console.log(`Navigating to profile: ${senderId}`);
+        
+        // First navigate to the profile
+        navigate(`/profile/${senderId}`);
+        
+        // Close the drawer after a short delay to ensure navigation starts
+        setTimeout(() => {
+          handleClose();
+        }, 300);
+      } else {
+        console.error("No sender ID found in notification:", notification);
+        toast.error("Could not find the referenced user");
+      }
+    } else {
+      console.warn("Unknown notification type:", notification.type);
+      toast.warning("This notification type is not supported yet");
+    }
+  };
+
+  const handleMarkAllRead = () => {
+    dispatch(markAllNotificationsRead());
+    handleClose(); // Close the popover after marking all as read
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? "notifications-popover" : undefined;
+
+  // Function to render a single notification
+  const renderNotification = (notification, index) => {
+    let content = '';
+    let icon = null;
+    let timestamp = notification.createdAt ? moment(notification.createdAt).fromNow() : 'just now';
+    
+    // Format content based on notification type
+    switch(notification.type) {
+      case 'like':
+        content = 'liked your post';
+        icon = <Heart size={16} className="text-red-500" />;
+        break;
+      case 'comment':
+        content = notification.message 
+          ? `commented: "${notification.message.substring(0, 20)}${notification.message.length > 20 ? '...' : ''}"`
+          : 'commented on your post';
+        icon = <MessageCircle size={16} className="text-blue-500" />;
+        break;
+      case 'follow':
+        content = 'started following you';
+        icon = <User size={16} className="text-green-500" />;
+        break;
+      default:
+        content = notification.message || 'interacted with you';
+        icon = <Bell size={16} className="text-gray-500" />;
+    }
+    
+    // Get user information
+    const username = notification.sender?.username || 
+                     notification.userDetails?.username || 
+                     'Unknown user';
+    
+    const profilePic = notification.sender?.profilePicture || 
+                      notification.userDetails?.profilePicture;
+    
+    // Handle click with proper event handling
+    const handleItemClick = (e) => {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent event bubbling
+      
+      // Use setTimeout to ensure the click ripple effect completes
+      setTimeout(() => {
+        handleNotificationClick(notification);
+      }, 150);
+    };
+    
+    return (
+      <div
+        key={notification._id || `notification-${index}`}
+        className={`flex gap-3 items-start p-4 hover:bg-gray-100 active:bg-gray-200 cursor-pointer transition-colors duration-150 ${
+          !notification.read ? 'bg-blue-50' : ''
+        }`}
+        onClick={handleItemClick}
+        role="button"
+        tabIndex={0}
+      >
+        <Avatar
+          alt={username}
+          src={profilePic}
+          sx={{ width: 42, height: 42 }}
+        />
+        <div className="flex-1 min-w-0"> {/* prevent overflow */}
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="font-bold text-sm mr-1">
+              {username}
+            </span>
+            <span className="text-xs text-gray-700 flex items-center gap-1 flex-wrap">
+              {icon} {content}
+            </span>
+          </div>
+          {notification.message && notification.type !== 'comment' && (
+            <p className="text-xs text-gray-600 mt-1 break-words">{notification.message}</p>
+          )}
+          <p className="text-xs text-gray-500 mt-1">
+            {timestamp}
+          </p>
+        </div>
+        {!notification.read && (
+          <div className="flex-shrink-0">
+            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Combine and sort all notifications for the "All" tab
+  const allNotifications = [
+    ...(Array.isArray(notifications) ? notifications : []), 
+    ...(Array.isArray(realtimeNotifications) ? realtimeNotifications : [])
+  ].sort((a, b) => new Date(b.createdAt || Date.now()) - new Date(a.createdAt || Date.now()));
+
+  // Filter by type for the other tabs
+  const followNotifications = allNotifications.filter(n => n.type === 'follow');
+  const likeNotifications = allNotifications.filter(n => n.type === 'like');
+  const commentNotifications = allNotifications.filter(n => n.type === 'comment');
+
+  // Notification tab panel content
+  const NotificationTabsContent = () => (
+    <>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1, bgcolor: 'white', position: 'sticky', top: 0, zIndex: 1 }}>
+        <Tabs 
+          value={tabValue} 
+          onChange={handleTabChange} 
+          variant="scrollable"
+          scrollButtons="auto"
+          aria-label="notification tabs"
+        >
+          <Tab label="All" />
+          <Tab label="Follows" />
+          <Tab label="Likes" />
+          <Tab label="Comments" />
+        </Tabs>
+        <IconButton 
+          size="small" 
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent bubbling
+            handleMarkAllRead();
+          }} 
+          title="Mark all as read"
+          color="primary"
+          className="hover:bg-blue-100"
+        >
+          <Check size={16} />
+        </IconButton>
+      </Box>
+      
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+          <CircularProgress size={24} />
+        </Box>
+      ) : (
+        <>
+          <TabPanel value={tabValue} index={0}>
+            {allNotifications.length === 0 ? (
+              <p className="p-4 text-sm text-gray-600 text-center">
+                No notifications
+              </p>
+            ) : (
+              allNotifications.map((notification, index) => renderNotification(notification, index))
+            )}
+          </TabPanel>
+          
+          <TabPanel value={tabValue} index={1}>
+            {followNotifications.length === 0 ? (
+              <p className="p-4 text-sm text-gray-600 text-center">
+                No follow notifications
+              </p>
+            ) : (
+              followNotifications.map((notification, index) => renderNotification(notification, index))
+            )}
+          </TabPanel>
+          
+          <TabPanel value={tabValue} index={2}>
+            {likeNotifications.length === 0 ? (
+              <p className="p-4 text-sm text-gray-600 text-center">
+                No like notifications
+              </p>
+            ) : (
+              likeNotifications.map((notification, index) => renderNotification(notification, index))
+            )}
+          </TabPanel>
+          
+          <TabPanel value={tabValue} index={3}>
+            {commentNotifications.length === 0 ? (
+              <p className="p-4 text-sm text-gray-600 text-center">
+                No comment notifications
+              </p>
+            ) : (
+              commentNotifications.map((notification, index) => renderNotification(notification, index))
+            )}
+          </TabPanel>
+        </>
+      )}
+    </>
+  );
+
+  return (
+    <div
+      ref={buttonRef}
+      onClick={(event) => {
+        handleClick(event);
+      }}
       className="flex items-center justify-center md:justify-start gap-2 p-2 w-full hover:bg-orange-100 rounded-md cursor-pointer transition"
     >
       {label === "Notifications" ? (
@@ -114,52 +419,97 @@ const SidebarItem = ({ icon, label, sidebarHandler }) => {
           <Badge
             badgeContent={unseenCount > 0 ? unseenCount : null}
             color="secondary"
-            onClick={handleClick}
+            onClick={(e) => e.stopPropagation()} // Prevent parent div click from triggering twice
           >
             <div className="text-gray-700">{icon}</div>
           </Badge>
 
-          <Popover
-            id={id}
-            open={open}
-            anchorEl={anchorEl}
-            onClose={handleClose}
-            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-          >
-            <div className="max-h-[300px] w-[300px] overflow-y-auto p-2">
-              {likeNotification.length === 0 ? (
-                <p className="p-4 text-sm text-gray-600">
-                  No new notifications
-                </p>
-              ) : (
-                likeNotification.map((notification, index) => (
-                  <div
-                    key={index}
-                    className="flex gap-2 items-center p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() =>
-                      handleNotificationClick(notification?.postId)
-                    }
+          {/* Desktop: Popover for notifications */}
+          {!isMobile && (
+            <Popover
+              id={id}
+              open={open}
+              anchorEl={anchorEl}
+              onClose={handleClose}
+              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+              transformOrigin={{ vertical: "top", horizontal: "left" }}
+              PaperProps={{
+                sx: { 
+                  width: 320, 
+                  maxHeight: 400,
+                  transition: 'opacity 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms'
+                },
+                onClick: (e) => e.stopPropagation() // Prevent popover clicks from bubbling
+              }}
+              TransitionProps={{
+                timeout: 250
+              }}
+              disableRestoreFocus
+              onClick={(e) => e.stopPropagation()} // Stop event bubbling
+            >
+              <NotificationTabsContent />
+            </Popover>
+          )}
+
+          {/* Mobile: Bottom drawer for notifications */}
+          {isMobile && (
+            <SwipeableDrawer
+              anchor="bottom"
+              open={isDrawerOpen}
+              onClose={handleClose}
+              onOpen={() => setIsDrawerOpen(true)}
+              disableSwipeToOpen
+              disableDiscovery={true}
+              PaperProps={{
+                sx: {
+                  borderTopLeftRadius: 16,
+                  borderTopRightRadius: 16,
+                  maxHeight: '85vh',
+                  overflowY: 'visible' // Allow content to handle its own scrolling
+                },
+                elevation: 8,
+                onClick: (e) => e.stopPropagation() // Prevent clicks from closing the drawer
+              }}
+              hysteresis={0.3} // Require more swipe distance to close
+              swipeAreaWidth={30} // Small swipe area at the top
+              ModalProps={{
+                keepMounted: true, // Better performance on mobile
+              }}
+            >
+              <Box 
+                sx={{ 
+                  position: 'sticky', 
+                  top: 0, 
+                  zIndex: 2, 
+                  backgroundColor: 'white', 
+                  pb: 1, 
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}
+              >
+                {/* Visual indicator for swipe */}
+                <div className="h-1 w-16 bg-gray-300 rounded-full mx-auto mt-2 mb-1"></div>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
+                  <Typography variant="h6">Notifications</Typography>
+                  <IconButton 
+                    onClick={handleClose} 
+                    edge="end"
+                    sx={{
+                      bgcolor: 'rgba(0,0,0,0.05)',
+                      '&:hover': {
+                        bgcolor: 'rgba(0,0,0,0.1)',
+                      }
+                    }}
                   >
-                    <Avatar
-                      alt={notification.userDetails?.username}
-                      src={notification.userDetails?.profilePicture}
-                    />
-                    <div>
-                      <p className="text-sm">
-                        <span className="font-bold">
-                          {notification.userDetails?.username}
-                        </span>{" "}
-                        liked your post
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {moment(notification?.createdAt).fromNow()}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </Popover>
+                    <X size={20} />
+                  </IconButton>
+                </Box>
+                <Divider />
+              </Box>
+              <div className="p-0" onClick={(e) => e.stopPropagation()}>
+                <NotificationTabsContent />
+              </div>
+            </SwipeableDrawer>
+          )}
 
           <span className="text-gray-700 text-sm hidden lg:inline">
             {label}

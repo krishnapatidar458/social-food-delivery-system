@@ -1,17 +1,11 @@
 import React from 'react'
-
 import Category from '../category/Category'
 import useGetAllPost from '../../hooks/useGetAllPost';
 import Posts from '../post/posts'
 import { useSelector } from 'react-redux';
 
-
-
-
 const Feeds = () => {
   const { posts } = useSelector((state) => state.post);
-  
- 
   
   useGetAllPost();
   return (

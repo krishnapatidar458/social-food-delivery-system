@@ -2,7 +2,7 @@ import React from 'react'
 import PostCard from './PostCard'
 import { useSelector } from 'react-redux'
 
-const posts = ({posts}) => {
+const Posts = ({posts}) => {
   
   
   return (
@@ -14,4 +14,4 @@ const posts = ({posts}) => {
   );
 }
 
-export default posts
+export default Posts
