@@ -1,9 +1,7 @@
 import React from "react";
-
 import { Outlet } from "react-router-dom";
 import Header from "../header/Header";
 import Leftsidebar from "../left/Leftsidebar";
-
 import ChatRightSideBar from "./ChatRightSideBar";
 
 const ChatLayout = () => {
@@ -18,8 +16,10 @@ const ChatLayout = () => {
             <Leftsidebar />
           </aside>
 
-          {/* Center Content */}
-          <Outlet />
+          {/* Center Content - Give it more space since conversation list is now in a drawer */}
+          <div className="flex-1 md:max-w-[calc(100%-320px)] lg:max-w-[calc(100%-600px)]">
+            <Outlet />
+          </div>
 
           {/* Right Sidebar */}
           <aside className="hidden lg:block lg:w-[300px] mr-5">

@@ -98,6 +98,8 @@ const rtnSlice = createSlice({
           normalizedNotification.message = 'commented on your post';
         } else if (normalizedNotification.type === 'follow') {
           normalizedNotification.message = 'started following you';
+        } else if (normalizedNotification.type === 'message') {
+          normalizedNotification.message = 'sent you a message';
         }
       }
       
