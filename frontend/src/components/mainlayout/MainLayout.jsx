@@ -1,12 +1,8 @@
-import React from 'react'
-import Header from '../header/Header';
-import Leftsidebar from '../left/Leftsidebar';
-import RightSideBar from '../right/RightSideBar';
-import { Outlet } from 'react-router-dom';
-
-
-
-
+import React from "react";
+import Header from "../header/Header";
+import Leftsidebar from "../left/Leftsidebar";
+import RightSideBar from "../right/RightSideBar";
+import { Outlet } from "react-router-dom";
 
 const MainLayout = () => {
   return (
@@ -21,7 +17,7 @@ const MainLayout = () => {
           </aside>
 
           {/* Center Content */}
-         <Outlet/>
+          <Outlet />
 
           {/* Right Sidebar */}
           <aside className="hidden lg:block lg:w-[300px] mr-5">
@@ -35,6 +31,6 @@ const MainLayout = () => {
       </div>
     </div>
   );
-}
+};
 
-export default MainLayout
+export default MainLayout;

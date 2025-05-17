@@ -1,9 +1,11 @@
-import { User } from "../models/user.model.js";
+import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { User } from "../models/user.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/datauri.js";
 import { Post } from "../models/post.model.js";
+import { getReceiverSocketId, io } from "../socket/socket.js";
 
 export const register = async (req, res) => {
   try {
@@ -225,59 +227,209 @@ export const getFollowings = async (req, res) => {
   }
 };
 
-
-
 export const followOrUnfollow = async (req, res) => {
   try {
-    const followKrneWala = req.id;
-    const jiskoFollowKrunga = req.params.id;
-    if (followKrneWala === jiskoFollowKrunga) {
+    const followerId = req.id; // ID of user who follows/unfollows
+    const targetUserId = req.params.id; // ID of user being followed/unfollowed
+    
+    // Input validation
+    if (!targetUserId || !targetUserId.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({
-        message: "You Cannot Follow Yourself",
-        success: false,
+        message: "Invalid user ID format",
+        success: false
       });
     }
-    const user = await User.findById(followKrneWala);
-    const targetUser = await User.findById(jiskoFollowKrunga);
+    
+    // Prevent self-following
+    if (followerId === targetUserId) {
+      return res.status(400).json({
+        message: "You cannot follow yourself",
+        success: false
+      });
+    }
+    
+    // Find both users with minimal projections for efficiency
+    const [follower, targetUser] = await Promise.all([
+      User.findById(followerId).select("username followings"),
+      User.findById(targetUserId).select("username followers")
+    ]);
 
-    if (!user || !targetUser) {
-      return res.status(400).json({
-        message: "User Not Found",
-        success: false,
+    // Check if both users exist
+    if (!follower) {
+      return res.status(404).json({
+        message: "Your user account was not found",
+        success: false
       });
     }
-    const isFollowing = user.followings.includes(jiskoFollowKrunga);
-    console.log(isFollowing);
+    
+    if (!targetUser) {
+      return res.status(404).json({
+        message: "The user you're trying to follow was not found",
+        success: false
+      });
+    }
+    
+    // Check if already following
+    const isFollowing = follower.followings.includes(targetUserId);
+    
+    // Get receiver socket ID for real-time notification
+    const receiverSocketId = getReceiverSocketId(targetUserId);
+    
     if (isFollowing) {
-      await Promise.all([
-        User.updateOne(
-          { _id: followKrneWala },
-          { $pull: { followings: jiskoFollowKrunga } }
-        ),
-        User.updateOne(
-          { _id: jiskoFollowKrunga },
-          { $pull: { followers: followKrneWala } }
-        ),
-      ]);
-      return res
-        .status(200)
-        .json({ message: "Unfollowed Successfully", success: true });
+      // UNFOLLOW LOGIC
+      try {
+        // Use Promise.all for parallel execution of both updates
+        await Promise.all([
+          User.findByIdAndUpdate(
+            followerId,
+            { $pull: { followings: targetUserId } },
+            { new: true }
+          ),
+          User.findByIdAndUpdate(
+            targetUserId,
+            { $pull: { followers: followerId } },
+            { new: true }
+          )
+        ]);
+        
+        // Send real-time notification for unfollow (optional)
+        if (receiverSocketId) {
+          io.to(receiverSocketId).emit("userUnfollowed", {
+            userId: followerId,
+            username: follower.username
+          });
+        }
+        
+        return res.status(200).json({ 
+          message: `You have unfollowed ${targetUser.username}`, 
+          success: true,
+          isFollowing: false,
+          follower: {
+            id: followerId,
+            username: follower.username
+          },
+          targetUser: {
+            id: targetUserId,
+            username: targetUser.username
+          }
+        });
+      } catch (updateError) {
+        console.error("Error during unfollow update:", updateError);
+        return res.status(500).json({
+          message: "Failed to unfollow user",
+          success: false
+        });
+      }
     } else {
-      await Promise.all([
-        User.updateOne(
-          { _id: followKrneWala },
-          { $push: { followings: jiskoFollowKrunga } }
-        ),
-        User.updateOne(
-          { _id: jiskoFollowKrunga },
-          { $push: { followers: followKrneWala } }
-        ),
-      ]);
-      return res
-        .status(200)
-        .json({ message: "Followed Successfully", success: true });
+      // FOLLOW LOGIC
+      try {
+        // Use Promise.all for parallel execution of both updates
+        const [updatedFollower, updatedTarget] = await Promise.all([
+          User.findByIdAndUpdate(
+            followerId,
+            { $addToSet: { followings: targetUserId } },
+            { new: true }
+          ).select("username followings"),
+          
+          User.findByIdAndUpdate(
+            targetUserId,
+            { $addToSet: { followers: followerId } },
+            { new: true }
+          ).select("username followers")
+        ]);
+        
+        // Create database notification
+        const { createNotification } = await import("./notification.controller.js");
+        const notification = await createNotification(
+          followerId,
+          targetUserId,
+          "follow",
+          `${follower.username} started following you`
+        );
+        
+        // Send real-time follow notification
+        if (receiverSocketId) {
+          // Send populated notification data for immediate display
+          const populatedNotification = await notification.populate("sender", "username profilePicture");
+          
+          io.to(receiverSocketId).emit("newNotification", populatedNotification);
+          
+          // Also emit a specific follow event for real-time UI updates
+          io.to(receiverSocketId).emit("userFollowed", {
+            userId: followerId,
+            username: follower.username,
+            notificationId: notification?._id
+          });
+        }
+        
+        return res.status(200).json({ 
+          message: `You are now following ${targetUser.username}`, 
+          success: true,
+          isFollowing: true,
+          follower: {
+            id: followerId,
+            username: updatedFollower.username,
+            followingCount: updatedFollower.followings.length
+          },
+          targetUser: {
+            id: targetUserId,
+            username: updatedTarget.username,
+            followerCount: updatedTarget.followers.length
+          }
+        });
+      } catch (updateError) {
+        console.error("Error during follow update:", updateError);
+        return res.status(500).json({
+          message: "Failed to follow user",
+          success: false
+        });
+      }
     }
   } catch (error) {
-    console.log(error);
+    console.error("Follow/Unfollow error:", error);
+    return res.status(500).json({
+      message: "Server error while processing follow/unfollow request",
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// Get user statistics (followers/followings count)
+export const getUserStats = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    // Validate user ID
+    if (!userId || !userId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID format"
+      });
+    }
+    
+    // Find user and count followers/followings
+    const user = await User.findById(userId).select("followers followings");
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+    
+    return res.status(200).json({
+      success: true,
+      userId,
+      followerCount: user.followers.length,
+      followingCount: user.followings.length
+    });
+    
+  } catch (error) {
+    console.error("Error fetching user stats:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching user statistics"
+    });
   }
 };

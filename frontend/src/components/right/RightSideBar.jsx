@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Avatar } from "@mui/material";
 import { useSelector } from "react-redux";
 import SuggestedUser from "./SuggestedUsers";
-
 import useGetSuggestedUser from "../../hooks/useGetSuggestedUser";
 
 const RightSidebar = () => {

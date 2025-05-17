@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import "./Categories.css"; // Import the CSS for custom scrollbar
 import { useNavigate } from "react-router-dom";
-import { dispatch } from './../../../node_modules/react-hot-toast/src/core/store';
+import { dispatch } from "./../../../node_modules/react-hot-toast/src/core/store";
 import { useDispatch } from "react-redux";
 import { setSelectedCategory } from "../../redux/categorySlice";
 
@@ -48,13 +48,12 @@ const categories = [
     image:
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrs6NpuNDkZDqyflqs7qSC31H88XYD3OZaeQ&s",
   },
-  
 ];
 
 const Categories = () => {
   const scrollRef = useRef(null);
-  const navigate=useNavigate();
-  const dispatch=useDispatch();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const scroll = (direction) => {
     const { current } = scrollRef;
@@ -67,9 +66,9 @@ const Categories = () => {
   const handleCategoryClick = (category) => {
     // Navigate to the category page with the selected category
     // and set the selected category in the Redux store
-    dispatch(setSelectedCategory(category))
+    dispatch(setSelectedCategory(category));
     navigate(`/category/${category.name}`, { state: { category } });
-  }
+  };
 
   return (
     <section className="py-8 px-4 relative">
@@ -99,7 +98,7 @@ const Categories = () => {
         {categories.map((category) => (
           <div
             key={category.id}
-            onClick={()=>handleCategoryClick(category)}
+            onClick={() => handleCategoryClick(category)}
             className="flex-shrink-0 flex flex-col items-center p-3 bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer w-32 snap-center group"
           >
             <div className="w-20 h-20 rounded-full overflow-hidden mb-2 border-2 border-transparent group-hover:border-orange-400 transition">

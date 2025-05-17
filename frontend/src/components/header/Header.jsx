@@ -11,7 +11,7 @@ import { setPosts, setSelectedPost } from "../../redux/postSlice";
 const Header = () => {
   const navigate = useNavigate();
   const { user } = useSelector((store) => store.auth);
-  const { cartItems } = useSelector((store) => store.cart); 
+  const { cartItems } = useSelector((store) => store.cart);
 
   const dispatch = useDispatch();
 
@@ -58,11 +58,13 @@ const Header = () => {
 
       {/* Right Section: Location and Buttons */}
       <div className="flex items-center gap-3 md:gap-6 flex-shrink-0">
-        <div className="flex items-center gap-2 text-gray-600" onClick={()=>navigate("/cartPage")}>
-        <Badge badgeContent={cartItems.length} color="secondary">
-          <ShoppingCart className="cursor-pointer" />
-        </Badge>
-          
+        <div
+          className="flex items-center gap-2 text-gray-600"
+          onClick={() => navigate("/cartPage")}
+        >
+          <Badge badgeContent={cartItems.length} color="secondary">
+            <ShoppingCart className="cursor-pointer" />
+          </Badge>
         </div>
 
         <div className="flex items-center gap-2">
