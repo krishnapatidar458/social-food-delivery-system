@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FiHeart, FiMessageCircle, FiSend } from "react-icons/fi";
+import { FiHeart, FiMessageCircle, FiSend, FiBookmark, FiShare } from "react-icons/fi";
 import { FcLike } from "react-icons/fc";
 import { Avatar, Badge, Menu, MenuItem } from "@mui/material";
 import CommentDialog from "../comment/CommentDialog";
+import ShareDialog from "../share/ShareDialog";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -15,21 +16,32 @@ import {
   removeFromCart,
 } from "../../redux/cartSlice";
 import { addNotification } from "../../redux/rtnSlice";
+import { updateBookmarks } from "../../redux/authSlice";
 
 const PostCard = ({ post }) => {
   const { user } = useSelector((store) => store.auth);
   const [liked, setLiked] = useState(post.likes.includes(user?._id));
   const [likeCount, setLikeCount] = useState(post.likes.length);
+  const [shareCount, setShareCount] = useState(post.shareCount || 0);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState(post.comments);
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [bookmarked, setBookmarked] = useState(user?.bookmarks?.includes(post._id));
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { posts } = useSelector((store) => store.post);
   const { cartItems } = useSelector((store) => store.cart);
+
+  // Check if post is in user's bookmarks when component mounts
+  useEffect(() => {
+    if (user && user.bookmarks) {
+      setBookmarked(user.bookmarks.includes(post._id));
+    }
+  }, [user, post._id]);
 
   const handleLike = async () => {
     try {
@@ -112,6 +124,40 @@ const PostCard = ({ post }) => {
     }
   };
 
+  const handleBookmark = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8000/api/v1/post/${post._id}/bookmark`,
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        setBookmarked(res.data.type === "saved");
+        toast.success(res.data.message);
+        
+        // Update bookmarks in the auth store
+        dispatch(updateBookmarks(post._id));
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Error updating bookmark.");
+    }
+  };
+
+  const handleShare = () => {
+    setShareDialogOpen(true);
+    handleMenuClose();
+  };
+
+  const handleShareSuccess = () => {
+    setShareCount(prevCount => prevCount + 1);
+    
+    // Update share count in posts state
+    const updatedPosts = posts.map((p) =>
+      p._id === post._id ? { ...p, shareCount: (p.shareCount || 0) + 1 } : p
+    );
+    dispatch(setPosts(updatedPosts));
+  };
+
   const addToCartHandler = () => {
     const cartItem = {
       _id: post._id,
@@ -128,6 +174,11 @@ const PostCard = ({ post }) => {
 
   const handleMenuOpen = (e) => setMenuAnchor(e.currentTarget);
   const handleMenuClose = () => setMenuAnchor(null);
+
+  const handleAddToFavorites = () => {
+    handleBookmark();
+    handleMenuClose();
+  };
 
   return (
     <div className="relative bg-white rounded-lg shadow-sm overflow-hidden mb-4 w-full mx-auto max-w-full">
@@ -175,8 +226,10 @@ const PostCard = ({ post }) => {
             open={Boolean(menuAnchor)}
             onClose={handleMenuClose}
           >
-            <MenuItem onClick={handleMenuClose}>Share</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Add to Favorites</MenuItem>
+            <MenuItem onClick={handleShare}>Share</MenuItem>
+            <MenuItem onClick={handleAddToFavorites}>
+              {bookmarked ? "Remove from Favorites" : "Add to Favorites"}
+            </MenuItem>
             {user?._id === post.author._id && (
               <MenuItem onClick={handleDeletePost}>Delete</MenuItem>
             )}
@@ -258,12 +311,26 @@ const PostCard = ({ post }) => {
             <FiMessageCircle />
           </button>
 
-          <button className="hover:text-green-500 transition cursor-pointer">
-            <FiSend />
+          <button 
+            onClick={handleShare}
+            className="hover:text-green-500 transition cursor-pointer"
+          >
+            <FiShare />
+          </button>
+          
+          <button 
+            onClick={handleBookmark} 
+            className={`transition cursor-pointer ${bookmarked ? "text-blue-500" : ""}`}
+          >
+            <FiBookmark />
           </button>
         </div>
 
-        <span className="font-md block my-2">{likeCount} likes</span>
+        <div className="flex items-center gap-4 my-2 text-sm">
+          <span className="font-medium">{likeCount} likes</span>
+          <span className="font-medium">{shareCount} shares</span>
+        </div>
+
         {comments.length > 0 && (
           <span
             onClick={() => {
@@ -280,6 +347,13 @@ const PostCard = ({ post }) => {
           open={commentDialogOpen}
           setOpen={setCommentDialogOpen}
           post={post}
+        />
+        
+        <ShareDialog
+          open={shareDialogOpen}
+          onClose={() => setShareDialogOpen(false)}
+          post={post}
+          onShareSuccess={handleShareSuccess}
         />
 
         <div className="flex item-center justify-between mt-2">

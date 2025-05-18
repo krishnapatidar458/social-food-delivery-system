@@ -8,6 +8,7 @@ import postRoute from "./routes/post.route.js";
 import storyRoute from "./routes/storyRoutes.js";
 import messageRoute from "./routes/message.route.js";
 import notificationRoute from "./routes/notification.route.js";
+import shareRoute from "./routes/share.route.js";
 import { app, server } from "./socket/socket.js";
 
 dotenv.config({});
@@ -31,6 +32,7 @@ app.use("/api/v1/post", postRoute);
 app.use("/api/v1/message", messageRoute);
 app.use("/api/v1/story", storyRoute);
 app.use("/api/v1/notifications", notificationRoute);
+app.use("/api/v1/share", shareRoute);
 
 //Routes
 app.get("/", (req, res) => {

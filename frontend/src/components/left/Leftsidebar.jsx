@@ -48,9 +48,11 @@ import {
 
 const Leftsidebar = () => {
   const [openPost, setOpenPost] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
   const navigate = useNavigate();
   const { user } = useSelector((store) => store.auth);
   const { unreadCounts } = useSelector((store) => store.chat);
+  const { posts } = useSelector((store) => store.post);
   const isMobile = useMediaQuery('(max-width:768px)');
   
   // Calculate total unread messages
@@ -60,6 +62,7 @@ const Leftsidebar = () => {
   const createPostHandler = () => {
     setOpenPost(true);
   };
+  
   const sidebarHandler = (textType) => {
     if (textType == "Post") {
       createPostHandler();
@@ -67,10 +70,21 @@ const Leftsidebar = () => {
       navigate(`/profile/${user._id}`);
     } else if (textType == "Home") {
       navigate("/");
+      setShowFavorites(false);
     } else if (textType == "Messages") {
       navigate("/chat/chatpage");
+      setShowFavorites(false);
+    } else if (textType == "Favorites") {
+      setShowFavorites(true);
+      navigate("/favorites");
     }
   };
+
+  // Get favorite posts
+  const favoritePosts = React.useMemo(() => {
+    if (!user?.bookmarks || !posts) return [];
+    return posts.filter(post => user.bookmarks.includes(post._id));
+  }, [user?.bookmarks, posts]);
 
   return (
     <nav className="flex md:flex-col relative items-center md:items-start gap-4 w-full border-r-1 h-full max-sm:border-hidden sm:p-4">
@@ -78,6 +92,7 @@ const Leftsidebar = () => {
         icon={<Home />}
         label="Home"
         sidebarHandler={sidebarHandler}
+        active={!showFavorites}
       />
       <SidebarItem
         icon={<Bell />}
@@ -93,6 +108,8 @@ const Leftsidebar = () => {
         icon={<Heart />}
         label="Favorites"
         sidebarHandler={sidebarHandler}
+        active={showFavorites}
+        badgeCount={user?.bookmarks?.length || 0}
       />
       <SidebarItem
         icon={<MessageCircle />}
@@ -106,6 +123,45 @@ const Leftsidebar = () => {
         sidebarHandler={sidebarHandler}
       />
       <CreatePost open={openPost} setOpen={setOpenPost} />
+      
+      {/* Favorites Drawer - Only shown on mobile when Favorites is active */}
+      {isMobile && showFavorites && (
+        <SwipeableDrawer
+          anchor="bottom"
+          open={showFavorites}
+          onClose={() => setShowFavorites(false)}
+          onOpen={() => setShowFavorites(true)}
+        >
+          <Box sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Favorites
+            </Typography>
+            {favoritePosts.length > 0 ? (
+              favoritePosts.map(post => (
+                <Box 
+                  key={post._id} 
+                  sx={{ 
+                    mb: 2, 
+                    p: 2, 
+                    borderRadius: 1, 
+                    border: '1px solid #eee',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => navigate(`/post/${post._id}`)}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Avatar src={post.author?.profilePicture} sx={{ mr: 1, width: 32, height: 32 }} />
+                    <Typography variant="subtitle2">{post.author?.username}</Typography>
+                  </Box>
+                  <Typography variant="body2" noWrap>{post.caption}</Typography>
+                </Box>
+              ))
+            ) : (
+              <Typography variant="body2">No favorites yet.</Typography>
+            )}
+          </Box>
+        </SwipeableDrawer>
+      )}
     </nav>
   );
 };
@@ -133,7 +189,7 @@ function TabPanel(props) {
   );
 }
 
-const SidebarItem = ({ icon, label, badgeCount, sidebarHandler }) => {
+const SidebarItem = ({ icon, label, badgeCount, sidebarHandler, active = false }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -429,7 +485,9 @@ const SidebarItem = ({ icon, label, badgeCount, sidebarHandler }) => {
       onClick={(event) => {
         handleClick(event);
       }}
-      className="flex items-center justify-center md:justify-start gap-2 p-2 w-full hover:bg-orange-100 rounded-md cursor-pointer transition"
+      className={`flex items-center justify-center md:justify-start gap-2 p-2 w-full hover:bg-orange-100 rounded-md cursor-pointer transition
+        ${active ? "bg-orange-100 text-orange-500" : "hover:bg-gray-100 text-gray-600"}
+      `}
     >
       {label === "Notifications" ? (
         <>

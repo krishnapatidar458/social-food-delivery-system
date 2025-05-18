@@ -23,6 +23,7 @@ import {
   getSocket
 } from "./services/socketManager";
 import PostDetail from "./components/post/PostDetail";
+import FavoritesPage from "./components/favorites/FavoritesPage";
 
 const browserRouter = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ const browserRouter = createBrowserRouter([
       {
         path: "/post/:id",
         element: <PostDetail />,
+      },
+      {
+        path: "/favorites",
+        element: <FavoritesPage />,
       },
     ],
   },

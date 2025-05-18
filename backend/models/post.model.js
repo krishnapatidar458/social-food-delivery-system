@@ -41,6 +41,10 @@ const postSchema = new mongoose.Schema({
       ref: "Comment",
     },
   ],
+  shareCount: {
+    type: Number,
+    default: 0,
+  },
   ratings: {
     type: Number,
     default: 0,
