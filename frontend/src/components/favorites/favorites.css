@@ -1,0 +1,149 @@
+/* Favorites page specific styling */
+
+/* Animated bookmark icon */
+.bookmark-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Card hover effects */
+.favorite-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.favorite-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom scrollbar for favorites */
+.favorites-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.favorites-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.favorites-container::-webkit-scrollbar-thumb {
+  background: #ff9800;
+  border-radius: 10px;
+}
+
+.favorites-container::-webkit-scrollbar-thumb:hover {
+  background: #e88c00;
+}
+
+/* Grid layout animations */
+.grid-item-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.grid-item-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.grid-item-exit {
+  opacity: 1;
+}
+
+.grid-item-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Empty state styling */
+.empty-favorites {
+  background: linear-gradient(to bottom right, #fff5e6, #fff);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.empty-favorites svg {
+  color: #ff9800;
+  opacity: 0.5;
+}
+
+/* Category tags */
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: #fff8e1;
+  color: #ff9800;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.category-tag:hover {
+  background-color: #ffe0b2;
+}
+
+/* Stats card */
+.stats-card {
+  background: linear-gradient(135deg, #fff3e0, #fff);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stats-title {
+  color: #e65100;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.stats-title svg {
+  margin-right: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ff9800;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #757575;
+  margin-top: 0.25rem;
+}
+
+/* Search bar styling */
+.search-input {
+  transition: width 0.3s ease;
+  width: 200px;
+}
+
+.search-input:focus {
+  width: 250px;
+}
+
+/* Tab indicator */
+.custom-tab-indicator {
+  background-color: #ff9800 !important;
+  height: 3px !important;
+} 

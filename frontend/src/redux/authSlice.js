@@ -25,6 +25,20 @@ const authSlice = createSlice({
     setSelectedUser: (state, action) => {
       state.selectedUser = action.payload;
     },
+    updateBookmarks: (state, action) => {
+      if (state.user) {
+        const postId = action.payload;
+        const isCurrentlyBookmarked = state.user.bookmarks?.includes(postId);
+        
+        if (isCurrentlyBookmarked) {
+          // Remove from bookmarks
+          state.user.bookmarks = state.user.bookmarks.filter(id => id !== postId);
+        } else {
+          // Add to bookmarks
+          state.user.bookmarks = state.user.bookmarks ? [...state.user.bookmarks, postId] : [postId];
+        }
+      }
+    },
   },
 });
 
@@ -35,4 +49,5 @@ export const {
   setUserProfile,
   setUserShorts,
   setSelectedUser,
+  updateBookmarks,
 } = authSlice.actions;

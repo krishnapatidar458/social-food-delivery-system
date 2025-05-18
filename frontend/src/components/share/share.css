@@ -1,0 +1,254 @@
+/* Share dialog styling */
+
+.share-dialog .MuiDialogTitle-root {
+  padding: 16px 24px;
+}
+
+.share-tabs .MuiTab-root {
+  min-width: 80px;
+  padding: 12px 16px;
+  text-transform: none;
+}
+
+.share-tabs .MuiTabs-indicator {
+  background-color: #f97316;
+  height: 3px;
+}
+
+.user-list .MuiListItem-root:hover {
+  background-color: rgba(249, 115, 22, 0.05);
+}
+
+.user-list .MuiListItem-secondaryAction {
+  right: 8px;
+}
+
+.share-button {
+  text-transform: none !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.share-button.twitter {
+  color: #1da1f2 !important;
+  border-color: rgba(29, 161, 242, 0.5) !important;
+}
+
+.share-button.twitter:hover {
+  background-color: rgba(29, 161, 242, 0.1) !important;
+  border-color: #1da1f2 !important;
+}
+
+.share-button.facebook {
+  color: #4267B2 !important;
+  border-color: rgba(66, 103, 178, 0.5) !important;
+}
+
+.share-button.facebook:hover {
+  background-color: rgba(66, 103, 178, 0.1) !important;
+  border-color: #4267B2 !important;
+}
+
+.share-button.whatsapp {
+  color: #4ECB5C !important;
+  border-color: rgba(78, 203, 92, 0.5) !important;
+}
+
+.share-button.whatsapp:hover {
+  background-color: rgba(78, 203, 92, 0.1) !important;
+  border-color: #4ECB5C !important;
+}
+
+.share-button.telegram {
+  color: #0088cc !important;
+  border-color: rgba(0, 136, 204, 0.5) !important;
+}
+
+.share-button.telegram:hover {
+  background-color: rgba(0, 136, 204, 0.1) !important;
+  border-color: #0088cc !important;
+}
+
+.share-button.email {
+  color: #BB001B !important;
+  border-color: rgba(187, 0, 27, 0.5) !important;
+}
+
+.share-button.email:hover {
+  background-color: rgba(187, 0, 27, 0.1) !important;
+  border-color: #BB001B !important;
+}
+
+.share-button.sms {
+  color: #7D3AC1 !important;
+  border-color: rgba(125, 58, 193, 0.5) !important;
+}
+
+.share-button.sms:hover {
+  background-color: rgba(125, 58, 193, 0.1) !important;
+  border-color: #7D3AC1 !important;
+}
+
+.share-chip {
+  border-color: #f97316 !important;
+  color: #f97316 !important;
+  padding: 8px 12px !important;
+  height: 36px !important;
+  border-radius: 18px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.share-chip:hover {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+}
+
+/* Animation for success state */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.share-dialog .MuiDialogContent-root {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Styling for the link input */
+.share-dialog input[readonly] {
+  padding: 8px;
+  border-radius: 4px;
+}
+
+/* Custom icon stylings */
+.telegram-icon svg {
+  margin-top: 2px;
+}
+
+/* Success animation */
+.success-icon {
+  animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* Animated icon */
+.animated-icon {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+  }
+}
+
+/* Preview container styles */
+.preview-container {
+  transition: all 0.3s ease;
+  min-height: 400px;
+  overflow: hidden;
+}
+
+.share-preview {
+  transition: all 0.3s ease;
+}
+
+/* Tab transition effects */
+.share-subtab-content {
+  transition: all 0.3s ease;
+}
+
+/* Enhanced dialog content */
+.share-dialog-content {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Share stats styling */
+.share-stats .platform-bar {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #f97316;
+}
+
+/* Schedule component styling */
+.schedule-form-field {
+  margin-bottom: 16px;
+}
+
+/* Share history list styling */
+.share-history-item {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.share-history-item:last-child {
+  border-bottom: none;
+}
+
+/* Enhanced animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up-animation {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+/* Card hover effects */
+.hover-card {
+  transition: all 0.3s ease;
+}
+
+.hover-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive styling */
+@media (max-width: 600px) {
+  .share-dialog .MuiDialogTitle-root {
+    padding: 12px 16px;
+  }
+  
+  .share-tabs .MuiTab-root {
+    min-width: 60px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .share-button {
+    font-size: 0.75rem !important;
+    padding: 6px 8px !important;
+  }
+  
+  .share-dialog-content {
+    max-height: 80vh;
+  }
+} 
