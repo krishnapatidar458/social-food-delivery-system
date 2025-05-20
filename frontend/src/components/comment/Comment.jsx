@@ -14,6 +14,9 @@ const Comment = ({ comment }) => {
           {comment?.author?.username}
         </span>
         <span className="text-sm text-gray-700">{comment?.text}</span>
+        <span className="text-xs text-gray-500">
+          {new Date(comment?.createdAt).toLocaleString()}
+        </span>
       </div>
     </div>
   );

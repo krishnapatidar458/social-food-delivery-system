@@ -15,6 +15,7 @@ import { setPosts } from "../../redux/postSlice";
 
 const CommentDialog = ({ open, setOpen, post }) => {
   const [text, setText] = useState("");
+  const [parentId, setParentId] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { selectedPost, posts } = useSelector((store) => store.post);
@@ -36,6 +37,7 @@ const CommentDialog = ({ open, setOpen, post }) => {
 
   const handleCloseDialog = () => {
     setText("");
+    setParentId(null);
     setOpen(false);
   };
 
@@ -47,7 +49,7 @@ const CommentDialog = ({ open, setOpen, post }) => {
     try {
       const res = await axios.post(
         `http://localhost:8000/api/v1/post/${selectedPost?._id}/comment`,
-        { text },
+        { text, parentId },
         {
           headers: {
             "Content-Type": "application/json",
@@ -62,6 +64,7 @@ const CommentDialog = ({ open, setOpen, post }) => {
 
         setComments(updatedComments); // ✅ update local UI
         setText("");
+        setParentId(null);
 
         // Update Redux state
         const updatedPostData = posts.map((p) =>
@@ -75,7 +78,14 @@ const CommentDialog = ({ open, setOpen, post }) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleCloseDialog} fullWidth maxWidth="md">
+    <Dialog 
+      open={open} 
+      onClose={handleCloseDialog} 
+      fullWidth 
+      maxWidth="md"
+      closeAfterTransition
+      disableRestoreFocus
+    >
       <DialogContent className="p-0">
         <div className="flex h-[500px]">
           {/* Left side - media */}
@@ -103,7 +113,7 @@ const CommentDialog = ({ open, setOpen, post }) => {
               <div className="flex items-center gap-2">
                 <Link to="/profile">
                   <Avatar
-                    src={selectedPost?.author?.userProfile}
+                    src={selectedPost?.author?.profilePicture}
                     alt={selectedPost?.author?.username}
                   />
                 </Link>

@@ -1,7 +1,8 @@
 /* Categories.css */
 
+/* Custom scrollbar styles */
 .custom-scrollbar::-webkit-scrollbar {
-  height: 8px;
+  height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -22,4 +23,23 @@
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #d4d4d4 transparent;
+}
+
+/* Hide scrollbar but maintain functionality */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* For active category */
+.category-active {
+  color: #3b82f6;
+}
+
+.category-active .category-image {
+  border-color: #3b82f6;
 }

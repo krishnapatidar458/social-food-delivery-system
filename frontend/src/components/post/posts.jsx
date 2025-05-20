@@ -1,8 +1,10 @@
 import React from 'react'
 import PostCard from './PostCard'
+import { useSelector } from 'react-redux'
 
-const posts = ({posts, category}) => {
-  console.log(posts)
+const Posts = ({posts}) => {
+  
+  
   return (
     <div>
       {posts.map((post) => {
@@ -12,4 +14,4 @@ const posts = ({posts, category}) => {
   );
 }
 
-export default posts
+export default Posts

@@ -4,7 +4,7 @@ import axios from "axios";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
-const useGetUserProfile = (userId) => {
+const useGetUserProfile = (userId ) => {
   const dispatch = useDispatch();
   useEffect(() => {
     const fetchUserProfile = async () => {

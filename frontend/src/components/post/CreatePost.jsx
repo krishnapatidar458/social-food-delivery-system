@@ -1,5 +1,5 @@
 import React, { use, useEffect, useRef, useState } from "react";
-import { Dialog, DialogTitle, DialogContent, Button } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, Button, FormControlLabel, Checkbox, FormControl, FormLabel, RadioGroup, Radio } from "@mui/material";
 import { readFileAsDataURL } from "../../lib/utils";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
@@ -9,6 +9,8 @@ import { useDispatch, useSelector } from "react-redux";
 import store from './../../redux/store';
 import { setPosts } from "../../redux/postSlice";
 
+// API base URL from environment or default to localhost
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const CreatePost = ({ open, setOpen, refreshPosts }) => {
   const postRef = useRef();
@@ -18,6 +20,8 @@ const CreatePost = ({ open, setOpen, refreshPosts }) => {
   const [loading, setLoading] = useState(false);
   const [postPreview, setPostPreview] = useState("");
   const [category, setCategory] = useState("");
+  const [vegetarian, setVegetarian] = useState(false);
+  const [spicyLevel, setSpicyLevel] = useState("none");
   const dispatch=useDispatch();
   
   const {posts}=useSelector(store=>store.post)
@@ -29,6 +33,9 @@ const CreatePost = ({ open, setOpen, refreshPosts }) => {
     setPrice("");
     setFile("");
     setPostPreview("");
+    setCategory("");
+    setVegetarian(false);
+    setSpicyLevel("none");
     setLoading(false);
   };
 
@@ -42,10 +49,12 @@ const CreatePost = ({ open, setOpen, refreshPosts }) => {
     formData.append("caption", caption);
     formData.append("price", price);
     formData.append("category", category);
+    formData.append("vegetarian", vegetarian);
+    formData.append("spicyLevel", spicyLevel);
 
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/v1/post/addpost",
+        `${API_BASE_URL}/api/v1/post/addpost`,
         formData,
         {
           headers: {
@@ -73,6 +82,7 @@ const CreatePost = ({ open, setOpen, refreshPosts }) => {
       handleCloseDialog();
     } catch (error) {
       console.error("Error posting:", error);
+      toast.error(error.response?.data?.message || "Failed to create post");
       setLoading(false);
     }
   };
@@ -87,7 +97,7 @@ const CreatePost = ({ open, setOpen, refreshPosts }) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleCloseDialog}>
+    <Dialog open={open} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
       <DialogTitle className="text-center font-semibold">
         Create New Post
       </DialogTitle>
@@ -107,6 +117,7 @@ const CreatePost = ({ open, setOpen, refreshPosts }) => {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="border border-gray-300 p-2 rounded-md"
+            required
           >
             <option value="" disabled>
               Select Category
@@ -121,6 +132,38 @@ const CreatePost = ({ open, setOpen, refreshPosts }) => {
             <option value="Other">Other</option>
             <option value="All">All</option>
           </select>
+
+          {/* Food properties */}
+          <div className="flex flex-col gap-3 border border-gray-200 p-3 rounded-md bg-gray-50">
+            <h3 className="font-medium text-gray-700">Food Properties</h3>
+            
+            {/* Vegetarian toggle */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={vegetarian}
+                  onChange={(e) => setVegetarian(e.target.checked)}
+                  color="success"
+                />
+              }
+              label="Vegetarian"
+            />
+            
+            {/* Spicy level selection */}
+            <FormControl component="fieldset">
+              <FormLabel component="legend" className="text-sm text-gray-600">Spicy Level</FormLabel>
+              <RadioGroup
+                row
+                value={spicyLevel}
+                onChange={(e) => setSpicyLevel(e.target.value)}
+              >
+                <FormControlLabel value="none" control={<Radio size="small" />} label="Not Spicy" />
+                <FormControlLabel value="mild" control={<Radio size="small" />} label="Mild" />
+                <FormControlLabel value="medium" control={<Radio size="small" />} label="Medium" />
+                <FormControlLabel value="hot" control={<Radio size="small" />} label="Hot" />
+              </RadioGroup>
+            </FormControl>
+          </div>
 
           {postPreview && (
             <div className="w-full h-96">
@@ -149,6 +192,7 @@ const CreatePost = ({ open, setOpen, refreshPosts }) => {
             accept="image/*,video/*"
             className="hidden"
             onChange={fileChangeHandler}
+            required
           />
           <button
             type="button"
@@ -164,6 +208,7 @@ const CreatePost = ({ open, setOpen, refreshPosts }) => {
               onChange={(e) => setPrice(e.target.value)}
               placeholder="Price..."
               className="border border-gray-300 p-2 rounded-md"
+              required
             />
           )}
           {postPreview && (
