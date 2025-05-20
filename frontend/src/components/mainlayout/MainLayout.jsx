@@ -20,7 +20,7 @@ const MainLayout = () => {
           <Outlet />
 
           {/* Right Sidebar */}
-          <aside className="hidden lg:block lg:w-[300px] mr-5">
+          <aside className="hidden lg:block lg:w-[310px] mr-5">
             <RightSideBar />
           </aside>
         </div>

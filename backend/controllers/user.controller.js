@@ -144,6 +144,23 @@ export const logout = async (req, res) => {
 export const getProfile = async (req, res) => {
   try {
     const userId = req.params.id;
+    
+    // Check if userId is undefined or not a valid ObjectId
+    if (!userId || userId === 'undefined' || userId === 'null') {
+      return res.status(400).json({
+        message: "Invalid user ID provided",
+        success: false
+      });
+    }
+    
+    // Try to validate MongoDB ObjectId format
+    if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        message: "Invalid user ID format",
+        success: false
+      });
+    }
+    
     let user = await User.findById(userId)
       .populate({ path: "posts", createdAt: -1 })
       .populate("bookmarks");
@@ -621,7 +638,24 @@ export const searchUsers = async (req, res) => {
 
 export const getCurrentUser = async (req, res) => {
   try {
-    const userId = req.user.id;
+    // Get userId from authenticated user
+    const userId = req.id;
+    
+    // Check if userId is valid
+    if (!userId) {
+      return res.status(401).json({
+        message: "Authentication required",
+        success: false
+      });
+    }
+    
+    // Try to validate MongoDB ObjectId format
+    if (typeof userId === 'string' && !userId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        message: "Invalid user ID format",
+        success: false
+      });
+    }
     
     const user = await User.findById(userId).select("-password");
     

@@ -540,12 +540,12 @@ const Header = () => {
               <Filter size={20} className={showFilters ? 'text-orange-500' : 'text-gray-400'} />
             </button> */}
             
-            <button
+            <p
               type="submit"
-              className="px-4 py-2.5 bg-orange-500 text-white font-medium rounded-full hover:bg-orange-600 transition-colors hidden md:block"
+              className="px-4 py-2.5 mt-3 bg-orange-500 text-white font-medium rounded-sm hover:bg-orange-600 transition-colors hidden md:block"
             >
               Search
-            </button>
+            </p>
           </div>
           
           {/* Advanced Filter Section */}
@@ -1088,12 +1088,12 @@ const Header = () => {
             />
           </Link>
 
-          <button
+          <p
             onClick={logoutHandler}
-            className="px-4 py-1.5 text-sm font-semibold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition"
+            className="px-4 py-2 mt-3 text-sm font-semibold text-white bg-orange-500 rounded-sm hover:bg-orange-600 transition"
           >
             Logout
-          </button>
+          </p>
         </div>
       </div>
     </header>

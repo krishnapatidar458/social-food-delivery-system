@@ -889,9 +889,24 @@ export const ratePost = async (req, res) => {
       });
     }
 
+    // Initialize rating structure if it doesn't exist
+    if (!post.rating) {
+      post.rating = {
+        average: 0,
+        count: 0,
+        ratings: [],
+        distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+      };
+    }
+
+    // Initialize distribution if it doesn't exist
+    if (!post.rating.distribution) {
+      post.rating.distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    }
+
     // Check if user has already rated this post
     const existingRatingIndex = post.rating.ratings.findIndex(
-      r => r.user.toString() === userId
+      r => r.user && r.user.toString() === userId
     );
 
     // Process the rating
@@ -907,9 +922,15 @@ export const ratePost = async (req, res) => {
         createdAt: new Date()
       };
       
-      // Update rating distribution
-      post.rating.distribution[previousRating]--;
-      post.rating.distribution[rating]++;
+      // Update rating distribution safely
+      if (post.rating.distribution[previousRating] !== undefined) {
+        post.rating.distribution[previousRating]--;
+      }
+      if (post.rating.distribution[rating] !== undefined) {
+        post.rating.distribution[rating]++;
+      } else {
+        post.rating.distribution[rating] = 1;
+      }
     } else {
       // Add new rating
       post.rating.ratings.push({
@@ -919,9 +940,13 @@ export const ratePost = async (req, res) => {
         createdAt: new Date()
       });
       
-      // Increment count and update distribution
+      // Increment count and update distribution safely
       post.rating.count++;
-      post.rating.distribution[rating]++;
+      if (post.rating.distribution[rating] !== undefined) {
+        post.rating.distribution[rating]++;
+      } else {
+        post.rating.distribution[rating] = 1;
+      }
     }
 
     // Calculate new average rating
@@ -1007,25 +1032,46 @@ export const getPostRatings = async (req, res) => {
       });
     }
 
+    // Initialize rating structure if it doesn't exist
+    if (!post.rating) {
+      post.rating = {
+        average: 0,
+        count: 0,
+        ratings: [],
+        distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+      };
+      
+      // Save the initialized structure
+      await post.save();
+    }
+
+    // Initialize distribution if it doesn't exist
+    if (!post.rating.distribution) {
+      post.rating.distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      
+      // Save the initialized structure
+      await post.save();
+    }
+
     // Find the user's rating if it exists
     const userRating = post.rating.ratings.find(
-      r => r.user && r.user._id.toString() === userId
+      r => r.user && r.user._id && r.user._id.toString() === userId
     );
 
     return res.status(200).json({
       success: true,
       ratings: {
-        average: post.rating.average,
-        count: post.rating.count,
-        distribution: post.rating.distribution,
+        average: post.rating.average || 0,
+        count: post.rating.count || 0,
+        distribution: post.rating.distribution || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
         userRating: userRating ? {
           value: userRating.value,
           comment: userRating.comment,
           createdAt: userRating.createdAt
         } : null,
         recentRatings: post.rating.ratings
-          .sort((a, b) => b.createdAt - a.createdAt)
-          .slice(0, 10) // Return 10 most recent ratings
+          ? post.rating.ratings.sort((a, b) => b.createdAt - a.createdAt).slice(0, 10)
+          : [] // Return 10 most recent ratings or empty array if no ratings
       }
     });
   } catch (error) {
