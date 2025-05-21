@@ -12,7 +12,8 @@ import {
   X,
   Package,
   Receipt,
-  Settings
+  Settings,
+  Truck
 } from "lucide-react";
 import CreatePost from "../post/CreatePost";
 import { useDispatch, useSelector } from "react-redux";
@@ -89,6 +90,9 @@ const Leftsidebar = () => {
     } else if (textType == "Admin") {
       navigate("/admin/dashboard");
       setShowFavorites(false);
+    } else if (textType == "Delivery") {
+      navigate("/deliver/dashboard");
+      setShowFavorites(false);
     }
   };
 
@@ -142,6 +146,13 @@ const Leftsidebar = () => {
       <SidebarItem
         icon={<User />}
         label="Profile"
+        sidebarHandler={sidebarHandler}
+      />
+      
+      {/* Delivery Dashboard Link */}
+      <SidebarItem
+        icon={<Truck />}
+        label="Delivery"
         sidebarHandler={sidebarHandler}
       />
       

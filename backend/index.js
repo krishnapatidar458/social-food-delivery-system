@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
+import { setupChangeStreams } from "./utils/changeStreams.js";
 import userRoute from "./routes/user.route.js";
 import postRoute from "./routes/post.route.js";
 import storyRoute from "./routes/storyRoutes.js";
@@ -11,7 +12,8 @@ import notificationRoute from "./routes/notification.route.js";
 import shareRoute from "./routes/share.route.js";
 import orderRoute from "./routes/order.route.js";
 import categoryRoute from "./routes/category.route.js";
-import { app, server } from "./socket/socket.js";
+import deliveryAgentRoute from "./routes/deliveryAgent.route.js";
+import { app, server, io } from "./socket/socket.js";
 
 dotenv.config({});
 
@@ -23,6 +25,9 @@ app.use(
     credentials: true,
   })
 );
+
+// Make io available throughout the app
+app.set("io", io);
 
 app.use(express.json());
 app.use(cookieParser());
@@ -37,6 +42,7 @@ app.use("/api/v1/notifications", notificationRoute);
 app.use("/api/v1/share", shareRoute);
 app.use("/api/v1/orders", orderRoute);
 app.use("/api/v1/category", categoryRoute);
+app.use("/api/v1/delivery", deliveryAgentRoute);
 
 //Routes
 app.get("/", (req, res) => {
@@ -53,6 +59,7 @@ app.get("/api/health", (req, res) => {
       orders: "/api/v1/orders",
       posts: "/api/v1/post",
       users: "/api/v1/user",
+      delivery: "/api/v1/delivery",
     },
   });
 });
@@ -70,7 +77,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-server.listen(PORT, () => {
-  connectDB();
+server.listen(PORT, async () => {
+  await connectDB();
   console.log(`Server is running on port ${PORT}`);
+
+  // Set up MongoDB change streams for real-time updates
+  await setupChangeStreams();
 });

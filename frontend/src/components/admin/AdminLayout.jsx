@@ -41,7 +41,8 @@ import {
   ExitToApp as ExitIcon,
   Home as HomeIcon,
   ShoppingCart as ShoppingCartIcon,
-  BugReport as BugReportIcon
+  BugReport as BugReportIcon,
+  LocalShipping as DeliveryIcon
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -280,6 +281,19 @@ const AdminLayout = () => {
               <PeopleIcon />
             </ListItemIcon>
             <ListItemText primary="Users" />
+          </ListItemButton>
+        </ListItem>
+        
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/admin/delivery-agents"
+            selected={location.pathname === "/admin/delivery-agents"}
+          >
+            <ListItemIcon>
+              <DeliveryIcon />
+            </ListItemIcon>
+            <ListItemText primary="Delivery Agents" />
           </ListItemButton>
         </ListItem>
         

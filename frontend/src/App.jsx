@@ -34,6 +34,14 @@ import AdminCheck from "./pages/AdminCheck";
 import CategoriesManagement from "./components/admin/CategoriesManagement";
 import UsersManagement from "./components/admin/UsersManagement";
 import { toast } from "react-hot-toast";
+import DeliveryLayout from "./components/delivery/DeliveryLayout";
+import Dashboard from "./components/delivery/Dashboard";
+import Register from "./components/delivery/Register";
+import NearbyOrders from "./components/delivery/NearbyOrders";
+import MyDeliveries from "./components/delivery/MyDeliveries";
+import DeliveryHistory from "./components/delivery/DeliveryHistory";
+import DeliveryProfile from "./components/delivery/Profile";
+import DeliveryAgentsManagement from "./components/admin/DeliveryAgentsManagement";
 
 const browserRouter = createBrowserRouter([
   {
@@ -118,6 +126,10 @@ const browserRouter = createBrowserRouter([
         element: <UsersManagement />,
       },
       {
+        path: "delivery-agents",
+        element: <DeliveryAgentsManagement />,
+      },
+      {
         path: "check",
         element: <AdminCheck />,
       },
@@ -127,6 +139,37 @@ const browserRouter = createBrowserRouter([
   {
     path: "/admin-check",
     element: <AdminCheck />,
+  },
+  // Delivery Routes
+  {
+    path: "/deliver",
+    element: <DeliveryLayout />,
+    children: [
+      {
+        path: "dashboard",
+        element: <Dashboard />,
+      },
+      {
+        path: "register",
+        element: <Register />,
+      },
+      {
+        path: "nearby-orders",
+        element: <NearbyOrders />,
+      },
+      {
+        path: "my-deliveries",
+        element: <MyDeliveries />,
+      },
+      {
+        path: "history",
+        element: <DeliveryHistory />,
+      },
+      {
+        path: "profile",
+        element: <DeliveryProfile />,
+      },
+    ],
   },
 ]);
 

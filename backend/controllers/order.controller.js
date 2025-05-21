@@ -20,7 +20,9 @@ export const createOrder = async (req, res, next) => {
       deliveryFee,
       discount,
       total,
-      promoCodeApplied
+      promoCodeApplied,
+      pickupCoordinates, // [longitude, latitude]
+      deliveryCoordinates // [longitude, latitude]
     } = req.body;
 
     // Validate required fields
@@ -61,11 +63,31 @@ export const createOrder = async (req, res, next) => {
       }
     }
 
+    // Prepare pickup and delivery locations
+    const pickupLocation = {
+      type: "Point",
+      coordinates: pickupCoordinates || [0, 0] // Default to [0,0] if not provided
+    };
+    
+    const deliveryLocation = {
+      type: "Point",
+      coordinates: deliveryCoordinates || [0, 0] // Default to [0,0] if not provided
+    };
+    
+    // Create initial status history entry
+    const statusHistory = [{
+      status: 'processing',
+      timestamp: new Date(),
+      note: 'Order received'
+    }];
+
     // Create the order with a default status of 'processing'
     const newOrder = new Order({
       user: req.user.id,
       items,
       deliveryAddress,
+      pickupLocation,
+      deliveryLocation,
       deliveryMethod,
       deliveryInstructions,
       contactNumber,
@@ -77,7 +99,8 @@ export const createOrder = async (req, res, next) => {
       promoCodeApplied,
       status: 'processing',
       paymentMethod,
-      paymentStatus: paymentMethod === 'cash' ? 'pending' : 'paid'
+      paymentStatus: paymentMethod === 'cash' ? 'pending' : 'paid',
+      statusHistory
     });
 
     // Save the order
@@ -189,17 +212,26 @@ export const getOrderById = async (req, res, next) => {
     const orderId = req.params.id;
 
     // Make sure order exists and belongs to current user
-    const order = await Order.findById(orderId).populate({
-      path: 'items.productId',
-      select: 'caption image price category vegetarian'
-    });
+    const order = await Order.findById(orderId)
+      .populate({
+        path: 'items.productId',
+        select: 'caption image price category vegetarian'
+      })
+      .populate({
+        path: 'deliveryAgent',
+        select: 'vehicleType vehicleNumber currentLocation',
+        populate: {
+          path: 'user',
+          select: 'username avatar' 
+        }
+      });
 
     if (!order) {
       return next(createError(404, "Order not found"));
     }
 
-    // Check if the order belongs to the user
-    if (order.user.toString() !== req.user.id) {
+    // Check if the order belongs to the user or if user is admin
+    if (order.user.toString() !== req.user.id && !req.user.isAdmin) {
       return next(createError(403, "You are not authorized to access this order"));
     }
 
@@ -214,6 +246,24 @@ export const getOrderById = async (req, res, next) => {
         image: product?.image || null
       };
     });
+
+    // Format delivery agent info if present
+    let deliveryAgentInfo = null;
+    if (order.deliveryAgent) {
+      deliveryAgentInfo = {
+        id: order.deliveryAgent._id,
+        name: order.deliveryAgent.user?.username || 'Delivery Agent',
+        avatar: order.deliveryAgent.user?.avatar || null,
+        vehicleType: order.deliveryAgent.vehicleType,
+        vehicleNumber: order.deliveryAgent.vehicleNumber,
+        currentLocation: order.deliveryAgent.currentLocation
+      };
+    }
+
+    // Get the latest status history entry
+    const latestStatus = order.statusHistory && order.statusHistory.length > 0
+      ? order.statusHistory[order.statusHistory.length - 1]
+      : null;
 
     const formattedOrder = {
       _id: order._id,
@@ -232,7 +282,14 @@ export const getOrderById = async (req, res, next) => {
       status: order.status,
       paymentStatus: order.paymentStatus,
       createdAt: order.createdAt,
-      updatedAt: order.updatedAt
+      updatedAt: order.updatedAt,
+      deliveryLocation: order.deliveryLocation,
+      pickupLocation: order.pickupLocation,
+      estimatedDeliveryTime: order.estimatedDeliveryTime,
+      actualDeliveryTime: order.actualDeliveryTime,
+      deliveryAgent: deliveryAgentInfo,
+      statusHistory: order.statusHistory || [],
+      latestStatus: latestStatus
     };
 
     return res.status(200).json({
@@ -443,84 +500,78 @@ export const getAllOrders = async (req, res, next) => {
 export const updateOrderStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { status, paymentStatus } = req.body;
+    const { status, note } = req.body;
     
-    // Validate input
-    if (!id) {
-      return next(createError(400, "Order ID is required"));
-    }
-    
-    if (!status && !paymentStatus) {
-      return next(createError(400, "No changes provided"));
+    // Validate status value
+    const validStatuses = ['processing', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return next(createError(400, "Invalid status value"));
     }
     
     // Find the order
     const order = await Order.findById(id);
-    
     if (!order) {
       return next(createError(404, "Order not found"));
     }
     
-    // Update the order status
-    const updateData = {};
+    // Update status
+    const oldStatus = order.status;
+    order.status = status;
     
-    if (status) {
-      // Validate the status
-      const validStatuses = ["processing", "confirmed", "preparing", "out_for_delivery", "delivered", "cancelled"];
-      if (!validStatuses.includes(status)) {
-        return next(createError(400, "Invalid order status"));
-      }
-      
-      updateData.status = status;
-      
-      // Handle inventory if order is cancelled
-      if (status === 'cancelled' && order.status !== 'cancelled') {
-        // Restore inventory for all items
-        for (const item of order.items) {
-          await Post.findByIdAndUpdate(
-            item.productId,
-            { $inc: { quantity: item.quantity } },
-            { new: true }
-          );
-        }
-      }
-    }
-    
-    if (paymentStatus) {
-      // Validate the payment status
-      const validPaymentStatuses = ["pending", "paid", "failed", "refunded"];
-      if (!validPaymentStatuses.includes(paymentStatus)) {
-        return next(createError(400, "Invalid payment status"));
-      }
-      
-      updateData.paymentStatus = paymentStatus;
-    }
-    
-    // Update the order
-    const updatedOrder = await Order.findByIdAndUpdate(
-      id,
-      { $set: updateData },
-      { new: true }
-    )
-    .populate('user', 'username email profilePicture')
-    .populate({
-      path: 'items.productId',
-      select: 'caption image price category'
+    // Add status change to history
+    order.statusHistory.push({
+      status,
+      timestamp: new Date(),
+      note: note || `Status changed from ${oldStatus} to ${status}`
     });
     
-    // Send notification to user
-    if (status && status !== order.status) {
-      // TODO: Send notification logic
+    // Additional processing based on status
+    switch (status) {
+      case 'confirmed':
+        // Notify customer that order is confirmed
+        break;
+      case 'preparing':
+        // Notify customer that order is being prepared
+        break;
+      case 'out_for_delivery':
+        // If no delivery agent assigned yet, this is just a status change
+        // Agent assignment is handled in the assignOrderAgent function
+        break;
+      case 'delivered':
+        order.actualDeliveryTime = new Date();
+        break;
+      case 'cancelled':
+        // Handle refund process if needed
+        if (order.paymentStatus === 'paid') {
+          order.paymentStatus = 'refunded';
+        }
+        break;
+      default:
+        // No additional processing needed
+        break;
+    }
+    
+    // Save the updated order
+    await order.save();
+    
+    // Notify user about order status change via socket
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user_${order.user}`).emit("orderStatusUpdate", {
+        orderId: order._id,
+        status: order.status,
+        timestamp: new Date()
+      });
     }
     
     return res.status(200).json({
       success: true,
-      message: "Order updated successfully",
-      order: updatedOrder
+      message: `Order status updated to ${status}`,
+      order
     });
   } catch (error) {
     console.error("Error updating order status:", error);
-    return next(createError(500, "Error updating order"));
+    return next(createError(500, "Error updating order status: " + error.message));
   }
 };
 

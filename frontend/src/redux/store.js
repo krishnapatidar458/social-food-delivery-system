@@ -19,6 +19,7 @@ import socketSlice from './socketSlice';
 import chatSlice from './chatSlice';
 import rtnSlice from "./rtnSlice"
 import adminSlice from "./adminSlice";
+import deliverySlice from "./deliverySlice";
 import { createLogger } from 'redux-logger';
 
 // Create logger instance
@@ -33,7 +34,7 @@ const persistConfig = {
   key: "root",
   storage,
   version: 1,
-  blacklist: ['socket', 'cart'], // Don't persist socket or cart in root (cart has separate config)
+  blacklist: ['socket', 'cart', 'delivery'], // Don't persist socket, cart, or delivery in root
 };
 
 // Separate config for cart slice
@@ -49,6 +50,13 @@ const chatPersistConfig = {
   storage,
 };
 
+// Config for delivery slice
+const deliveryPersistConfig = {
+  key: 'delivery',
+  storage,
+  blacklist: ['isActionPending', 'actionError', 'isLocationUpdating', 'isNearbyOrdersLoading'], // Don't persist these transient states
+};
+
 const rootReducer = combineReducers({
   auth: authSlice,
   post: postSlice,
@@ -59,6 +67,7 @@ const rootReducer = combineReducers({
   chat: persistReducer(chatPersistConfig, chatSlice),
   realTimeNotification: rtnSlice,
   admin: adminSlice,
+  delivery: persistReducer(deliveryPersistConfig, deliverySlice),
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

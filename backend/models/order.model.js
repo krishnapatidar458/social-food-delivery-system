@@ -32,6 +32,26 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    deliveryLocation: {
+      type: {
+        type: String,
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        default: [0, 0],
+      },
+    },
+    pickupLocation: {
+      type: {
+        type: String,
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        default: [0, 0],
+      },
+    },
     deliveryMethod: {
       type: String,
       enum: ["standard", "express", "pickup"],
@@ -83,11 +103,44 @@ const orderSchema = new mongoose.Schema(
       default: "pending",
     },
     deliveryAgent: {
-      id: String,
-      name: String
-    }
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DeliveryAgent",
+    },
+    estimatedDeliveryTime: {
+      type: Date,
+    },
+    actualDeliveryTime: {
+      type: Date,
+    },
+    statusHistory: [
+      {
+        status: {
+          type: String,
+          required: true,
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+        location: {
+          type: {
+            type: String,
+            default: "Point",
+          },
+          coordinates: {
+            type: [Number], // [longitude, latitude]
+            default: [0, 0],
+          },
+        },
+        note: String,
+      },
+    ],
   },
   { timestamps: true }
 );
+
+// Create geospatial indexes for location-based queries
+orderSchema.index({ deliveryLocation: "2dsphere" });
+orderSchema.index({ pickupLocation: "2dsphere" });
 
 export default mongoose.model("Order", orderSchema); 
