@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-hot-toast";
 
-const useGetUserProfile = (userId) => {
+const useGetUserProfile = (userId ) => {
   const dispatch = useDispatch();
   
   useEffect(() => {

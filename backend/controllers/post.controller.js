@@ -218,13 +218,21 @@ export const getUserPost = async (req, res) => {
     
     const posts = await Post.find({ author: authorId })
       .sort({ createdAt: -1 })
+<<<<<<< HEAD
       .populate({ path: "author", select: "username profilePicture location" })
+=======
+      .populate({ path: "author", select: "username profilePicture" })
+>>>>>>> main
       .populate({
         path: "comments",
         sort: { createdAt: -1 },
         populate: {
           path: "author",
+<<<<<<< HEAD
           select: "username profilePicture location",
+=======
+          select: "username profilePicture",
+>>>>>>> main
         },
       });
       
@@ -385,7 +393,11 @@ export const addComment = async (req, res) => {
   try {
     const postId = req.params.id;
     const authorId = req.id;
+<<<<<<< HEAD
     const { text, parentId } = req.body;
+=======
+    const { text } = req.body;
+>>>>>>> main
     
     if (!text) {
       return res.status(400).json({
@@ -655,13 +667,21 @@ export const getSinglePost = async (req, res) => {
     // Try to find the post without validation
     try {
       const post = await Post.findById(postId)
+<<<<<<< HEAD
         .populate({ path: "author", select: "username profilePicture location" })
+=======
+        .populate({ path: "author", select: "username profilePicture" })
+>>>>>>> main
         .populate({
           path: "comments",
           sort: { createdAt: -1 },
           populate: {
             path: "author",
+<<<<<<< HEAD
             select: "username profilePicture location",
+=======
+            select: "username profilePicture",
+>>>>>>> main
           },
         });
         
@@ -696,6 +716,7 @@ export const getSinglePost = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
 export const findNearbyPosts = async (req, res) => {
   try {
     const { longitude, latitude, maxDistance = 10000 } = req.query; // maxDistance in meters
@@ -1172,4 +1193,6 @@ export const getBookmarkedPosts = async (req, res) => {
   }
 };
 
+=======
+>>>>>>> main
 

@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+<<<<<<< HEAD
 const initialState = {
   connected: false,
   socketId: null,
@@ -9,6 +10,14 @@ const initialState = {
 const socketSlice = createSlice({
   name: "socket",
   initialState,
+=======
+const socketSlice = createSlice({
+  name: "socketio",
+  initialState: {
+    connected: false,
+    socketId: null
+  },
+>>>>>>> main
   reducers: {
     setSocketConnected: (state, action) => {
       state.connected = action.payload.connected;
@@ -17,6 +26,7 @@ const socketSlice = createSlice({
     resetSocketState: (state) => {
       state.connected = false;
       state.socketId = null;
+<<<<<<< HEAD
       // Keep order status updates in case we reconnect
     },
     addOrderStatusUpdate: (state, action) => {
@@ -28,10 +38,13 @@ const socketSlice = createSlice({
     },
     clearOrderStatusUpdates: (state) => {
       state.orderStatusUpdates = [];
+=======
+>>>>>>> main
     }
   },
 });
 
+<<<<<<< HEAD
 export const { 
   setSocketConnected, 
   resetSocketState, 
@@ -40,3 +53,7 @@ export const {
 } = socketSlice.actions;
 
 export default socketSlice.reducer;
+=======
+export default socketSlice.reducer;
+export const { setSocketConnected, resetSocketState } = socketSlice.actions;
+>>>>>>> main

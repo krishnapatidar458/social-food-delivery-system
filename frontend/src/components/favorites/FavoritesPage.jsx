@@ -1,8 +1,16 @@
+<<<<<<< HEAD
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+=======
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+>>>>>>> main
 import { 
   CircularProgress, 
   Box, 
@@ -20,8 +28,12 @@ import {
   Chip,
   Menu,
   MenuItem,
+<<<<<<< HEAD
   Divider,
   Alert
+=======
+  Divider
+>>>>>>> main
 } from '@mui/material';
 import { 
   ArrowLeft, 
@@ -35,12 +47,20 @@ import {
   Clock,
   MapPin,
   BarChart2,
+<<<<<<< HEAD
   Award,
   RefreshCcw
 } from 'lucide-react';
 import PostCard from '../post/PostCard';
 import { setPosts } from '../../redux/postSlice';
 import { updateBookmarks, syncUserBookmarks } from '../../redux/authSlice';
+=======
+  Award
+} from 'lucide-react';
+import PostCard from '../post/PostCard';
+import { setPosts } from '../../redux/postSlice';
+import { updateBookmarks } from '../../redux/authSlice';
+>>>>>>> main
 import './favorites.css'; // Import custom CSS
 
 const TabPanel = (props) => {
@@ -66,11 +86,18 @@ const TabPanel = (props) => {
 const FavoritesPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+<<<<<<< HEAD
   const { user, bookmarksLoading, bookmarksError } = useSelector((store) => store.auth);
   const { posts } = useSelector((store) => store.post);
   
   const [loading, setLoading] = useState(true);
   const [syncingBookmarks, setSyncingBookmarks] = useState(false);
+=======
+  const { user } = useSelector((store) => store.auth);
+  const { posts } = useSelector((store) => store.post);
+  
+  const [loading, setLoading] = useState(true);
+>>>>>>> main
   const [tabValue, setTabValue] = useState(0);
   const [filterMenuAnchor, setFilterMenuAnchor] = useState(null);
   const [sortBy, setSortBy] = useState('newest');
@@ -78,9 +105,71 @@ const FavoritesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState([]);
   
+<<<<<<< HEAD
   // Define applyFiltersAndSort first, before we use it in loadFavorites
   // Apply filters and sorting to posts
   const applyFiltersAndSort = useCallback((posts) => {
+=======
+  // Get favorite posts based on user bookmarks
+  useEffect(() => {
+    if (!user?.bookmarks?.length) {
+      setFavoritePosts([]);
+      setLoading(false);
+      return;
+    }
+    
+    const getFavoritePosts = async () => {
+      try {
+        setLoading(true);
+        
+        // If we have posts in Redux, filter them first
+        const reduxFavorites = posts.filter(post => 
+          user.bookmarks.includes(post._id)
+        );
+        
+        // If all bookmarks are in Redux, use those and don't make API call
+        if (reduxFavorites.length === user.bookmarks.length) {
+          console.log("Using favorites from Redux store");
+          setFavoritePosts(applyFiltersAndSort(reduxFavorites));
+          setLoading(false);
+          return;
+        }
+        
+        // Otherwise, fetch fresh data from API
+        console.log("Fetching favorites from API");
+        const response = await axios.get(
+          'http://localhost:8000/api/v1/post/all',
+          { withCredentials: true }
+        );
+        
+        if (response.data.success) {
+          // Filter all posts to get only bookmarked ones
+          const bookmarkedPosts = response.data.posts.filter(post => 
+            user.bookmarks.includes(post._id)
+          );
+          
+          // Update Redux store with the latest posts
+          dispatch(setPosts(response.data.posts));
+          
+          // Set filtered and sorted favorites
+          setFavoritePosts(applyFiltersAndSort(bookmarkedPosts));
+        } else {
+          toast.error('Failed to fetch favorites');
+        }
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+        toast.error(error?.response?.data?.message || 'Error loading favorites');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    getFavoritePosts();
+  }, [user?.bookmarks, posts, dispatch, sortBy, searchQuery, activeFilters]);
+  
+  // Apply filters and sorting to posts
+  const applyFiltersAndSort = (posts) => {
+>>>>>>> main
     // Filter by search query
     let filtered = posts;
     if (searchQuery) {
@@ -117,6 +206,7 @@ const FavoritesPage = () => {
           return new Date(b.createdAt) - new Date(a.createdAt);
       }
     });
+<<<<<<< HEAD
   }, [sortBy, searchQuery, activeFilters]);
   
   // Now define loadFavorites, which depends on applyFiltersAndSort
@@ -260,6 +350,10 @@ const FavoritesPage = () => {
   }, [loadFavorites]);
   
   // All of the handlers and functions below
+=======
+  };
+  
+>>>>>>> main
   // Handle tab change
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -293,6 +387,7 @@ const FavoritesPage = () => {
   const handleRemoveBookmark = async (postId) => {
     try {
       const res = await axios.get(
+<<<<<<< HEAD
         `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/post/${postId}/bookmark`,
         { 
           withCredentials: true,
@@ -300,21 +395,30 @@ const FavoritesPage = () => {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         }
+=======
+        `http://localhost:8000/api/v1/post/${postId}/bookmark`,
+        { withCredentials: true }
+>>>>>>> main
       );
 
       if (res.data.success) {
         // Update bookmarks in Redux
         dispatch(updateBookmarks(postId));
+<<<<<<< HEAD
         toast.success(res.data.message || 'Removed from favorites');
         
         // Reload favorites to reflect changes
         setTimeout(() => loadFavorites(), 300);
+=======
+        toast.success(res.data.message);
+>>>>>>> main
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Error removing from favorites');
     }
   };
   
+<<<<<<< HEAD
   // Reset all filters
   const resetFilters = () => {
     setSearchQuery('');
@@ -338,6 +442,8 @@ const FavoritesPage = () => {
     }
   };
   
+=======
+>>>>>>> main
   // Get unique categories from favorites
   const uniqueCategories = [...new Set(
     favoritePosts
@@ -345,15 +451,31 @@ const FavoritesPage = () => {
       .map(post => post.category)
   )];
   
+<<<<<<< HEAD
   return (
     <div className="max-w-6xl mx-auto py-6 px-4">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between mb-6">
         <div className="flex items-center mb-2 sm:mb-0">
+=======
+  // Reset all filters
+  const resetFilters = () => {
+    setSearchQuery('');
+    setActiveFilters([]);
+    setSortBy('newest');
+  };
+  
+  return (
+    <div className="max-w-6xl mx-auto py-6 px-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+>>>>>>> main
           <IconButton onClick={() => navigate(-1)}>
             <ArrowLeft />
           </IconButton>
           <h1 className="text-xl font-semibold ml-2">My Favorites</h1>
+<<<<<<< HEAD
           <IconButton 
             onClick={handleRefreshBookmarks}
             disabled={syncingBookmarks}
@@ -368,12 +490,22 @@ const FavoritesPage = () => {
         
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-initial">
+=======
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <div className="relative">
+>>>>>>> main
             <input
               type="text"
               placeholder="Search favorites..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+<<<<<<< HEAD
               className="pl-8 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent search-input w-full"
+=======
+              className="pl-8 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent search-input"
+>>>>>>> main
             />
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           </div>
@@ -395,7 +527,11 @@ const FavoritesPage = () => {
               sx: { width: 240, padding: 1, maxHeight: 500 }
             }}
           >
+<<<<<<< HEAD
             <div style={{ padding: '8px 16px' }}>
+=======
+            <div className="px-2 py-1">
+>>>>>>> main
               <Typography variant="subtitle2" className="font-semibold mb-2">
                 Sort By
               </Typography>
@@ -404,38 +540,61 @@ const FavoritesPage = () => {
                 selected={sortBy === 'newest'}
                 dense
               >
+<<<<<<< HEAD
                 <Clock size={16} style={{ marginRight: 8 }} /> Newest First
+=======
+                <Clock size={16} className="mr-2" /> Newest First
+>>>>>>> main
               </MenuItem>
               <MenuItem 
                 onClick={() => handleSort('oldest')}
                 selected={sortBy === 'oldest'}
                 dense
               >
+<<<<<<< HEAD
                 <Clock size={16} style={{ marginRight: 8 }} /> Oldest First
+=======
+                <Clock size={16} className="mr-2" /> Oldest First
+>>>>>>> main
               </MenuItem>
               <MenuItem 
                 onClick={() => handleSort('most_liked')}
                 selected={sortBy === 'most_liked'}
                 dense
               >
+<<<<<<< HEAD
                 <Heart size={16} style={{ marginRight: 8 }} /> Most Liked
+=======
+                <Heart size={16} className="mr-2" /> Most Liked
+>>>>>>> main
               </MenuItem>
               <MenuItem 
                 onClick={() => handleSort('most_commented')}
                 selected={sortBy === 'most_commented'}
                 dense
               >
+<<<<<<< HEAD
                 <MessageCircle size={16} style={{ marginRight: 8 }} /> Most Commented
+=======
+                <MessageCircle size={16} className="mr-2" /> Most Commented
+>>>>>>> main
               </MenuItem>
               <MenuItem 
                 onClick={() => handleSort('highest_rated')}
                 selected={sortBy === 'highest_rated'}
                 dense
               >
+<<<<<<< HEAD
                 <Star size={16} style={{ marginRight: 8 }} /> Highest Rated
               </MenuItem>
               
               <Divider sx={{ my: 2 }} />
+=======
+                <Star size={16} className="mr-2" /> Highest Rated
+              </MenuItem>
+              
+              <Divider className="my-2" />
+>>>>>>> main
               
               <Typography variant="subtitle2" className="font-semibold mb-2">
                 Filter By Category
@@ -449,7 +608,11 @@ const FavoritesPage = () => {
                     selected={activeFilters.includes(category)}
                     dense
                   >
+<<<<<<< HEAD
                     <Tag size={16} style={{ marginRight: 8 }} /> {category}
+=======
+                    <Tag size={16} className="mr-2" /> {category}
+>>>>>>> main
                   </MenuItem>
                 ))
               ) : (
@@ -458,7 +621,11 @@ const FavoritesPage = () => {
                 </MenuItem>
               )}
               
+<<<<<<< HEAD
               <Divider sx={{ my: 2 }} />
+=======
+              <Divider className="my-2" />
+>>>>>>> main
               
               <Button 
                 variant="outlined" 
@@ -474,6 +641,7 @@ const FavoritesPage = () => {
         </div>
       </div>
       
+<<<<<<< HEAD
       {/* Show error message if bookmarks syncing failed */}
       {bookmarksError && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -481,6 +649,8 @@ const FavoritesPage = () => {
         </Alert>
       )}
       
+=======
+>>>>>>> main
       {/* Active filters display */}
       {activeFilters.length > 0 && (
         <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -517,7 +687,11 @@ const FavoritesPage = () => {
       
       {/* Loading state */}
       {loading ? (
+<<<<<<< HEAD
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+=======
+        <Box className="flex justify-center py-8">
+>>>>>>> main
           <CircularProgress />
         </Box>
       ) : (
@@ -582,10 +756,14 @@ const FavoritesPage = () => {
                             </div>
                             <IconButton 
                               size="small" 
+<<<<<<< HEAD
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleRemoveBookmark(post._id);
                               }}
+=======
+                              onClick={() => handleRemoveBookmark(post._id)}
+>>>>>>> main
                               color="primary"
                               className="bookmark-pulse"
                             >
@@ -604,7 +782,11 @@ const FavoritesPage = () => {
                           <div className="mt-auto pt-2 flex justify-between items-center">
                             <div className="flex items-center gap-2">
                               <span className="text-yellow-500 font-bold">
+<<<<<<< HEAD
                                 {"⭐".repeat(post.ratings || 0)}
+=======
+                                {"⭐".repeat(post.ratings)}
+>>>>>>> main
                               </span>
                               <Typography variant="caption" color="textSecondary">
                                 {post.likes?.length || 0} likes
@@ -658,21 +840,33 @@ const FavoritesPage = () => {
                           </h3>
                           <IconButton 
                             size="small" 
+<<<<<<< HEAD
                             onClick={(e) => {
                               e.stopPropagation();
                               handleRemoveBookmark(post._id);
                             }}
+=======
+                            onClick={() => handleRemoveBookmark(post._id)}
+>>>>>>> main
                           >
                             <Bookmark size={16} />
                           </IconButton>
                         </div>
                         <div className="flex items-center text-sm text-gray-500 mt-1">
                           <MapPin size={14} className="mr-1" /> 
+<<<<<<< HEAD
                           {post.location} {post.distance && `• ${post.distance} km`}
                         </div>
                         <div className="flex items-center gap-3 mt-2">
                           <span className="text-yellow-500 font-bold">
                             {"⭐".repeat(post.ratings || 0)}
+=======
+                          {post.location} • {post.distance} km
+                        </div>
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className="text-yellow-500 font-bold">
+                            {"⭐".repeat(post.ratings)}
+>>>>>>> main
                           </span>
                           <span className="text-xs text-gray-500 flex items-center">
                             <Heart size={14} className="mr-1" /> {post.likes?.length || 0}
@@ -704,7 +898,11 @@ const FavoritesPage = () => {
       {!loading && favoritePosts.length > 0 && (
         <Paper elevation={0} className="mt-6 p-4 stats-card">
           <Typography variant="subtitle2" gutterBottom className="stats-title">
+<<<<<<< HEAD
             <BarChart2 size={18} style={{ marginRight: 8 }} /> Favorites Statistics
+=======
+            <BarChart2 size={18} /> Favorites Statistics
+>>>>>>> main
           </Typography>
           <Grid container spacing={2} className="mt-1">
             <Grid item xs={6} sm={3}>

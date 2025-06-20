@@ -1,5 +1,6 @@
 // redux/cartSlice.js
 
+<<<<<<< HEAD
 import { createSlice, createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { createNewOrder, getUserOrders } from "../services/orderService";
@@ -69,10 +70,14 @@ export const fetchOrders = createAsyncThunk(
     }
   }
 );
+=======
+import { createSlice } from "@reduxjs/toolkit";
+>>>>>>> main
 
 const cartSlice = createSlice({
   name: "cart",
   initialState: {
+<<<<<<< HEAD
     // User-specific cart storage
     userCarts: {},
     // Current user id
@@ -670,5 +675,42 @@ export const {
 
 // Export the reset order status action separately
 export { resetOrderStatusAction };
+=======
+    cartItems: [],
+  },
+  reducers: {
+    addToCart: (state, action) => {
+      const existingItem = state.cartItems.find(
+        (item) => item._id === action.payload._id
+      );
+      if (!existingItem) {
+        state.cartItems.push({ ...action.payload, quantity: 1 });
+      }
+    },
+    increaseQuantity: (state, action) => {
+      const item = state.cartItems.find((i) => i._id === action.payload._id);
+      if (item) item.quantity++;
+    },
+    decreaseQuantity: (state, action) => {
+      const item = state.cartItems.find((i) => i._id === action.payload._id);
+      if (item && item.quantity > 1) {
+        item.quantity--;
+      } else {
+        // If quantity is 1, remove from cart
+        state.cartItems = state.cartItems.filter(
+          (i) => i._id !== action.payload._id
+        );
+      }
+    },
+    removeFromCart: (state, action) => {
+      const idToRemove = action.payload._id || action.payload;
+      state.cartItems = state.cartItems.filter((i) => i._id !== idToRemove);
+    },
+  },
+});
+
+export const { addToCart, increaseQuantity, decreaseQuantity, removeFromCart } =
+  cartSlice.actions;
+>>>>>>> main
 
 export default cartSlice.reducer;

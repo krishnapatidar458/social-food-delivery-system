@@ -17,6 +17,7 @@
   }
 }
 
+<<<<<<< HEAD
 /* Spinning animation for refresh button */
 .animate-spin {
   animation: spin 1s linear infinite;
@@ -35,6 +36,11 @@
 .favorite-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   height: 100%;
+=======
+/* Card hover effects */
+.favorite-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+>>>>>>> main
 }
 
 .favorite-card:hover {
@@ -90,13 +96,17 @@
   padding: 3rem 2rem;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+<<<<<<< HEAD
   margin-top: 20px;
   margin-bottom: 20px;
+=======
+>>>>>>> main
 }
 
 .empty-favorites svg {
   color: #ff9800;
   opacity: 0.5;
+<<<<<<< HEAD
   animation: float 3s ease-in-out infinite;
 }
 
@@ -110,6 +120,8 @@
   100% {
     transform: translateY(0px);
   }
+=======
+>>>>>>> main
 }
 
 /* Category tags */
@@ -128,7 +140,10 @@
 
 .category-tag:hover {
   background-color: #ffe0b2;
+<<<<<<< HEAD
   transform: scale(1.05);
+=======
+>>>>>>> main
 }
 
 /* Stats card */
@@ -137,12 +152,15 @@
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+<<<<<<< HEAD
   transition: transform 0.3s ease;
 }
 
 .stats-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+=======
+>>>>>>> main
 }
 
 .stats-title {
@@ -161,11 +179,14 @@
   font-size: 1.5rem;
   font-weight: 700;
   color: #ff9800;
+<<<<<<< HEAD
   transition: color 0.3s;
 }
 
 .stat-value:hover {
   color: #e65100;
+=======
+>>>>>>> main
 }
 
 .stat-label {
@@ -176,20 +197,29 @@
 
 /* Search bar styling */
 .search-input {
+<<<<<<< HEAD
   transition: all 0.3s ease;
   width: 200px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+=======
+  transition: width 0.3s ease;
+  width: 200px;
+>>>>>>> main
 }
 
 .search-input:focus {
   width: 250px;
+<<<<<<< HEAD
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+=======
+>>>>>>> main
 }
 
 /* Tab indicator */
 .custom-tab-indicator {
   background-color: #ff9800 !important;
   height: 3px !important;
+<<<<<<< HEAD
 }
 
 /* Responsive styles */
@@ -259,4 +289,6 @@
 .MuiButton-contained:hover {
   transform: translateY(-2px) !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+=======
+>>>>>>> main
 } 

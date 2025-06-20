@@ -13,9 +13,14 @@ import ChatPage from "./components/chat/ChatPage";
 import { useDispatch, useSelector } from "react-redux";
 import { setOnlineUsers } from "./redux/chatSlice";
 import { addNotification, fetchNotifications } from "./redux/rtnSlice";
+<<<<<<< HEAD
 import { setSocketConnected, resetSocketState, addOrderStatusUpdate } from "./redux/socketSlice";
 import { fetchCurrentUserFollowings } from "./redux/userSlice";
 import { setCurrentUser, migrateCart, syncOrderStatus, fetchOrders } from "./redux/cartSlice";
+=======
+import { setSocketConnected, resetSocketState } from "./redux/socketSlice";
+import { fetchCurrentUserFollowings } from "./redux/userSlice";
+>>>>>>> main
 import { 
   initSocket, 
   closeSocket, 
@@ -25,6 +30,7 @@ import {
 } from "./services/socketManager";
 import PostDetail from "./components/post/PostDetail";
 import FavoritesPage from "./components/favorites/FavoritesPage";
+<<<<<<< HEAD
 import SharedPost from "./components/share/SharedPost";
 import OrdersPage from "./components/orders/OrdersPage";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -42,6 +48,8 @@ import MyDeliveries from "./components/delivery/MyDeliveries";
 import DeliveryHistory from "./components/delivery/DeliveryHistory";
 import DeliveryProfile from "./components/delivery/Profile";
 import DeliveryAgentsManagement from "./components/admin/DeliveryAgentsManagement";
+=======
+>>>>>>> main
 
 const browserRouter = createBrowserRouter([
   {
@@ -64,10 +72,13 @@ const browserRouter = createBrowserRouter([
         path: "/favorites",
         element: <FavoritesPage />,
       },
+<<<<<<< HEAD
       {
         path: "/orders/*",
         element: <OrdersPage />,
       },
+=======
+>>>>>>> main
     ],
   },
   {
@@ -100,6 +111,7 @@ const browserRouter = createBrowserRouter([
       },
     ],
   },
+<<<<<<< HEAD
   {
     path: "/shared/:shareId",
     element: <SharedPost />,
@@ -171,6 +183,8 @@ const browserRouter = createBrowserRouter([
       },
     ],
   },
+=======
+>>>>>>> main
 ]);
 
 const App = () => {
@@ -179,6 +193,7 @@ const App = () => {
   const { unreadCounts } = useSelector((store) => store.chat); 
   const dispatch = useDispatch();
   
+<<<<<<< HEAD
   // Initialize user-specific cart when user logs in or out
   useEffect(() => {
     // Set current user ID for cart (or null if logged out)
@@ -199,6 +214,8 @@ const App = () => {
     }
   }, [user?._id, dispatch]);
   
+=======
+>>>>>>> main
   // Detect and fix corrupted chat state
   useEffect(() => {
     // Check if unreadCounts is undefined, which indicates a corrupted state
@@ -302,6 +319,7 @@ const App = () => {
           // Register notification handlers
           onEvent('notification', handleNotification);
           onEvent('newNotification', handleNotification);
+<<<<<<< HEAD
 
           // Register order status update handler
           onEvent('order_status_update', (data) => {
@@ -345,6 +363,8 @@ const App = () => {
               );
             }
           });
+=======
+>>>>>>> main
         }
 
         return () => {
@@ -355,7 +375,10 @@ const App = () => {
           offEvent('getOnlineUsers');
           offEvent('notification');
           offEvent('newNotification');
+<<<<<<< HEAD
           offEvent('order_status_update');
+=======
+>>>>>>> main
           
           closeSocket();
           dispatch(resetSocketState());
