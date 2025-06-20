@@ -4,7 +4,13 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon index.js"
+    "check-env": "node scripts/checkEnvironment.js",
+    "dev": "node scripts/checkEnvironment.js && nodemon index.js",
+    "start": "node scripts/checkEnvironment.js && node index.js",
+    "debug-start": "node scripts/checkEnvironment.js && node scripts/startServer.js",
+    "migrate-ratings": "node scripts/migrateRatings.js",
+    "make-admin": "node scripts/makeAdmin.js",
+    "list-users": "node scripts/listUsers.js"
   },
   "keywords": [],
   "author": "",

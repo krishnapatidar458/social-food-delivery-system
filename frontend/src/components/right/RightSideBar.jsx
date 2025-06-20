@@ -22,12 +22,11 @@ const RightSidebar = () => {
         </Link>
         <div>
           
-          <Link
-            to={`/profile/${user?._id}`}
-            className="block text-sm font-semibold text-gray-900 hover:text-black no-underline"
+          <p
+            className="block text-xl font-semibold text-gray-900 hover:text-black no-underline"
           >
             {user?.username}
-          </Link>
+          </p>
           <p className="text-gray-500 text-xs truncate w-44">
             {user?.bio || "No bio available"}
           </p>

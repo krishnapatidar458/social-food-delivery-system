@@ -50,7 +50,7 @@ const categories = [
   },
 ];
 
-const Categories = () => {
+const Category = () => {
   const scrollRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -118,4 +118,4 @@ const Categories = () => {
   );
 };
 
-export default Categories;
+export default Category;

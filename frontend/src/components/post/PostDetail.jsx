@@ -3,12 +3,23 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+<<<<<<< HEAD
+import { CircularProgress, Box, IconButton, Button, Divider, Paper, Rating, Typography, LinearProgress } from '@mui/material';
+import { ArrowLeft, MessageCircle, Heart, Star } from 'lucide-react';
+=======
 import { CircularProgress, Box, IconButton, Button, Divider } from '@mui/material';
 import { ArrowLeft, MessageCircle, Heart } from 'lucide-react';
+>>>>>>> main
 import PostCard from './PostCard';
 import { setSelectedPost } from '../../redux/postSlice';
 import CommentDialog from '../comment/CommentDialog';
 
+<<<<<<< HEAD
+// API base URL from environment or default to localhost
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+=======
+>>>>>>> main
 const PostDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -17,6 +28,11 @@ const PostDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+<<<<<<< HEAD
+  const [ratings, setRatings] = useState(null);
+  const [loadingRatings, setLoadingRatings] = useState(false);
+=======
+>>>>>>> main
   const { user } = useSelector((store) => store.auth);
   
   // Check if post exists in Redux store
@@ -49,7 +65,11 @@ const PostDetail = () => {
         setLoading(!post); // Only show loading if we don't have the post yet
         
         const response = await axios.get(
+<<<<<<< HEAD
+          `${API_BASE_URL}/api/v1/post/${id}`, 
+=======
           `http://localhost:8000/api/v1/post/${id}`, 
+>>>>>>> main
           { withCredentials: true }
         );
         
@@ -109,6 +129,34 @@ const PostDetail = () => {
     };
   }, [id, dispatch]);
 
+<<<<<<< HEAD
+  // Fetch ratings data
+  useEffect(() => {
+    const fetchRatings = async () => {
+      if (!post || !id) return;
+      
+      setLoadingRatings(true);
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/api/v1/post/${id}/ratings`,
+          { withCredentials: true }
+        );
+        
+        if (response.data.success) {
+          setRatings(response.data.ratings);
+        }
+      } catch (error) {
+        console.error("Error fetching ratings:", error);
+      } finally {
+        setLoadingRatings(false);
+      }
+    };
+    
+    fetchRatings();
+  }, [id, post]);
+
+=======
+>>>>>>> main
   const openComments = () => {
     if (post) {
       dispatch(setSelectedPost(post));
@@ -116,6 +164,95 @@ const PostDetail = () => {
     }
   };
 
+<<<<<<< HEAD
+  // Calculate percentage for star rating distribution
+  const calculatePercentage = (count) => {
+    if (!ratings || !ratings.count || ratings.count === 0) return 0;
+    return Math.round((count / ratings.count) * 100);
+  };
+
+  // Render Rating Summary
+  const renderRatingsSummary = () => {
+    if (loadingRatings) {
+      return (
+        <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+          <CircularProgress size={24} />
+        </Box>
+      );
+    }
+
+    if (!ratings) {
+      return (
+        <Typography color="text.secondary" variant="body2" sx={{ py: 2, textAlign: "center" }}>
+          No ratings information available
+        </Typography>
+      );
+    }
+
+    return (
+      <Box>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+          <Box sx={{ textAlign: "center", mr: 3 }}>
+            <Typography variant="h3" component="div" sx={{ fontWeight: "bold", color: "primary.main" }}>
+              {ratings.average ? ratings.average.toFixed(1) : "0.0"}
+            </Typography>
+            <Rating value={ratings.average || 0} precision={0.5} readOnly size="medium" />
+            <Typography variant="body2" color="text.secondary">
+              {ratings.count || 0} {ratings.count === 1 ? "rating" : "ratings"}
+            </Typography>
+          </Box>
+          <Box sx={{ flexGrow: 1 }}>
+            {[5, 4, 3, 2, 1].map((star) => (
+              <Box key={star} sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
+                <Typography variant="body2" sx={{ minWidth: "20px", mr: 1 }}>
+                  {star}
+                </Typography>
+                <Box sx={{ width: "100%", mr: 1 }}>
+                  <LinearProgress
+                    variant="determinate"
+                    value={calculatePercentage(ratings.distribution?.[star] || 0)}
+                    sx={{ 
+                      height: 8, 
+                      borderRadius: 1,
+                      backgroundColor: 'grey.300',
+                      '& .MuiLinearProgress-bar': {
+                        backgroundColor: star > 3 ? 'success.main' : star > 1 ? 'warning.main' : 'error.main',
+                      }
+                    }}
+                  />
+                </Box>
+                <Typography variant="body2" sx={{ minWidth: "35px" }}>
+                  {calculatePercentage(ratings.distribution?.[star] || 0)}%
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+
+        {ratings.userRating && (
+          <Box sx={{ mt: 2, p: 2, bgcolor: "primary.50", borderRadius: 1 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Your Rating
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Rating value={ratings.userRating.value} readOnly size="small" />
+              <Typography variant="body2" sx={{ ml: 1 }}>
+                {new Date(ratings.userRating.createdAt).toLocaleDateString()}
+              </Typography>
+            </Box>
+            {ratings.userRating.comment && (
+              <Typography variant="body2" sx={{ mt: 1, fontStyle: "italic" }}>
+                "{ratings.userRating.comment}"
+              </Typography>
+            )}
+          </Box>
+        )}
+      </Box>
+    );
+  };
+
+=======
+>>>>>>> main
   // Debug render state
   console.log("Render state:", { loading, error, hasPost: !!post });
 
@@ -148,6 +285,28 @@ const PostDetail = () => {
         <>
           <PostCard post={post} />
           
+<<<<<<< HEAD
+          {/* Ratings Summary Section */}
+          <Paper elevation={1} sx={{ p: 3, mt: 3, borderRadius: 2 }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+              <Typography variant="h6" component="h2" sx={{ display: "flex", alignItems: "center" }}>
+                <Star size={20} className="mr-2" /> Ratings & Reviews
+              </Typography>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                size="small"
+                onClick={() => document.querySelector(`button[data-post-id="${post._id}"]`)?.click()}
+              >
+                {ratings?.userRating ? "Update Your Rating" : "Rate This Food"}
+              </Button>
+            </Box>
+            <Divider sx={{ mb: 2 }} />
+            {renderRatingsSummary()}
+          </Paper>
+          
+=======
+>>>>>>> main
           {/* Extra interaction section */}
           <div className="bg-white rounded-xl shadow-lg p-4 mt-4">
             <div className="flex justify-between items-center mb-4">
@@ -198,6 +357,16 @@ const PostDetail = () => {
       ) : (
         <div className="p-4 bg-gray-100 rounded-md">
           Post not found
+<<<<<<< HEAD
+        </div>
+      )}
+
+      <CommentDialog
+        open={commentDialogOpen}
+        setOpen={setCommentDialogOpen}
+        post={post}
+      />
+=======
           <Button 
             variant="text" 
             color="primary" 
@@ -217,6 +386,7 @@ const PostDetail = () => {
           post={post}
         />
       )}
+>>>>>>> main
     </div>
   );
 };

@@ -37,14 +37,24 @@ const Login = () => {
         );
         console.log(res.data);
         if(res.data.success){
-          dispatch(setAuthUser(res.data.user))
-            navigate("/")
-            toast.success(res.data.message)
-            setInput({
-              
-              email:"",
-              password:""
-            })
+          const userData = {
+            ...res.data.user,
+            isAdmin: res.data.user.isAdmin || false
+          };
+          
+          dispatch(setAuthUser(userData));
+          
+          if (userData.isAdmin && window.location.pathname.includes('/admin')) {
+            navigate('/admin/dashboard');
+          } else {
+            navigate("/");
+          }
+          
+          toast.success(res.data.message)
+          setInput({
+            email:"",
+            password:""
+          })
         }
     }catch(error){
         console.log(error)

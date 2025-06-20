@@ -97,7 +97,7 @@ const Signup = () => {
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             </Button>
           ) : (
-            <Button type="submit">Login</Button>
+            <Button type="submit">SignUp</Button>
           )}
           <div className="text-center">
             Already have an account?{" "}

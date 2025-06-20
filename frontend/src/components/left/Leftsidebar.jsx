@@ -10,6 +10,13 @@ import {
   Check,
   Trash2,
   X,
+<<<<<<< HEAD
+  Package,
+  Receipt,
+  Settings,
+  Truck
+=======
+>>>>>>> main
 } from "lucide-react";
 import CreatePost from "../post/CreatePost";
 import { useDispatch, useSelector } from "react-redux";
@@ -77,6 +84,21 @@ const Leftsidebar = () => {
     } else if (textType == "Favorites") {
       setShowFavorites(true);
       navigate("/favorites");
+<<<<<<< HEAD
+    } else if (textType == "Cart") {
+      navigate("/cartPage");
+      setShowFavorites(false);
+    } else if (textType == "Orders") {
+      navigate("/orders");
+      setShowFavorites(false);
+    } else if (textType == "Admin") {
+      navigate("/admin/dashboard");
+      setShowFavorites(false);
+    } else if (textType == "Delivery") {
+      navigate("/deliver/dashboard");
+      setShowFavorites(false);
+=======
+>>>>>>> main
     }
   };
 
@@ -117,11 +139,38 @@ const Leftsidebar = () => {
         badgeCount={totalUnreadMessages}
         sidebarHandler={sidebarHandler}
       />
+      {/* <SidebarItem
+        icon={<ShoppingCart />}
+        label="Cart"
+        sidebarHandler={sidebarHandler}
+      />
+      <SidebarItem
+        icon={<Receipt />}
+        label="Orders"
+        sidebarHandler={sidebarHandler}
+      /> */}
       <SidebarItem
         icon={<User />}
         label="Profile"
         sidebarHandler={sidebarHandler}
       />
+      
+      {/* Delivery Dashboard Link */}
+      <SidebarItem
+        icon={<Truck />}
+        label="Delivery"
+        sidebarHandler={sidebarHandler}
+      />
+      
+      {/* Only show Admin link to admin users */}
+      {user?.isAdmin && (
+        <SidebarItem
+          icon={<Settings />}
+          label="Admin"
+          sidebarHandler={sidebarHandler}
+        />
+      )}
+      
       <CreatePost open={openPost} setOpen={setOpenPost} />
       
       {/* Favorites Drawer - Only shown on mobile when Favorites is active */}
@@ -348,7 +397,11 @@ const SidebarItem = ({ icon, label, badgeCount, sidebarHandler, active = false }
     
     return (
       <div
+<<<<<<< HEAD
+        key={notification._id ? notification._id : `notification-${index}`}
+=======
         key={notification._id || `notification-${index}`}
+>>>>>>> main
         className={`flex gap-3 items-start p-4 hover:bg-gray-100 active:bg-gray-200 cursor-pointer transition-colors duration-150 ${
           !notification.read ? 'bg-blue-50' : ''
         }`}
@@ -441,7 +494,11 @@ const SidebarItem = ({ icon, label, badgeCount, sidebarHandler, active = false }
                 No notifications
               </p>
             ) : (
+<<<<<<< HEAD
+              allNotifications.map((notification, index) => renderNotification(notification, `all-${index}`))
+=======
               allNotifications.map((notification, index) => renderNotification(notification, index))
+>>>>>>> main
             )}
           </TabPanel>
           
@@ -451,7 +508,11 @@ const SidebarItem = ({ icon, label, badgeCount, sidebarHandler, active = false }
                 No follow notifications
               </p>
             ) : (
+<<<<<<< HEAD
+              followNotifications.map((notification, index) => renderNotification(notification, `follow-${index}`))
+=======
               followNotifications.map((notification, index) => renderNotification(notification, index))
+>>>>>>> main
             )}
           </TabPanel>
           
@@ -461,7 +522,11 @@ const SidebarItem = ({ icon, label, badgeCount, sidebarHandler, active = false }
                 No like notifications
               </p>
             ) : (
+<<<<<<< HEAD
+              likeNotifications.map((notification, index) => renderNotification(notification, `like-${index}`))
+=======
               likeNotifications.map((notification, index) => renderNotification(notification, index))
+>>>>>>> main
             )}
           </TabPanel>
           
@@ -471,7 +536,11 @@ const SidebarItem = ({ icon, label, badgeCount, sidebarHandler, active = false }
                 No comment notifications
               </p>
             ) : (
+<<<<<<< HEAD
+              commentNotifications.map((notification, index) => renderNotification(notification, `comment-${index}`))
+=======
               commentNotifications.map((notification, index) => renderNotification(notification, index))
+>>>>>>> main
             )}
           </TabPanel>
         </>
