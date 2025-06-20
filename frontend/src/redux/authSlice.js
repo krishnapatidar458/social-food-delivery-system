@@ -71,9 +71,12 @@ const authSlice = createSlice({
     userProfile: null,
     selectedUser: null,
     shorts: null,
+<<<<<<< HEAD
     bookmarksLoading: false,
     bookmarksError: null,
     lastBookmarkUpdate: null,
+=======
+>>>>>>> main
   },
   reducers: {
     setAuthUser: (state, action) => {
@@ -94,6 +97,7 @@ const authSlice = createSlice({
     updateBookmarks: (state, action) => {
       if (state.user) {
         const postId = action.payload;
+<<<<<<< HEAD
         console.log(`Updating bookmarks for post: ${postId}`);
         
         // Ensure bookmarks is initialized as an array
@@ -148,6 +152,19 @@ const authSlice = createSlice({
         state.bookmarksError = action.payload;
         console.error("Bookmark sync rejected:", action.payload);
       });
+=======
+        const isCurrentlyBookmarked = state.user.bookmarks?.includes(postId);
+        
+        if (isCurrentlyBookmarked) {
+          // Remove from bookmarks
+          state.user.bookmarks = state.user.bookmarks.filter(id => id !== postId);
+        } else {
+          // Add to bookmarks
+          state.user.bookmarks = state.user.bookmarks ? [...state.user.bookmarks, postId] : [postId];
+        }
+      }
+    },
+>>>>>>> main
   },
 });
 

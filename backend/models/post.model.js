@@ -42,6 +42,13 @@ const postSchema = new mongoose.Schema({
     },
   ],
   shareCount: {
+<<<<<<< HEAD
+=======
+    type: Number,
+    default: 0,
+  },
+  ratings: {
+>>>>>>> main
     type: Number,
     default: 0,
   },

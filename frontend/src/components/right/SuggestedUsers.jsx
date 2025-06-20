@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Avatar, Tooltip, CircularProgress } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
+<<<<<<< HEAD
 import { Link, useNavigate } from "react-router-dom";
+=======
+import { Link } from "react-router-dom";
+>>>>>>> main
 import { followOrUnfollow, getUserStats } from "../../redux/userSlice";
 import { toast } from "react-toastify";
 
@@ -9,7 +13,10 @@ const SuggestedUsers = () => {
   const { suggestedUsers } = useSelector((store) => store.auth);
   const { followings, loading, error, lastAction, userStats = {} } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+<<<<<<< HEAD
   const navigate=useNavigate();
+=======
+>>>>>>> main
   const [processingUserId, setProcessingUserId] = useState(null);
   const [showAll, setShowAll] = useState(false);
 
@@ -97,10 +104,16 @@ const SuggestedUsers = () => {
           return (
             <div
               key={user._id}
+<<<<<<< HEAD
               
               className="flex items-center justify-between p-1 hover:bg-gray-50 rounded-md transition"
             >
               <div className="flex items-center gap-3" >
+=======
+              className="flex items-center justify-between p-1 hover:bg-gray-50 rounded-md transition"
+            >
+              <div className="flex items-center gap-3">
+>>>>>>> main
                 <Link to={`/profile/${user._id}`}>
                   <Avatar
                     alt={user.username}
@@ -109,9 +122,15 @@ const SuggestedUsers = () => {
                   />
                 </Link>
                 <div className="text-sm">
+<<<<<<< HEAD
                   <>
                     <p className="font-medium text-gray-800">{user.username}</p>
                   </>
+=======
+                  <Link to={`/profile/${user._id}`}>
+                    <p className="font-medium text-gray-800">{user.username}</p>
+                  </Link>
+>>>>>>> main
                   <p className="text-xs text-gray-500 truncate w-36">
                     {user.bio || "No bio"}
                   </p>
@@ -125,10 +144,17 @@ const SuggestedUsers = () => {
               </div>
               
               <Tooltip title={isFollowing ? "Unfollow" : "Follow"}>
+<<<<<<< HEAD
                 <p
                   onClick={() => handleFollowClick(user._id)}
                   disabled={isProcessing || loading}
                   className={`px-4 py-2 cursor-pointer mr-1 rounded-sm mx-[-2rem] text-sm font-medium transition duration-200 ${
+=======
+                <button
+                  onClick={() => handleFollowClick(user._id)}
+                  disabled={isProcessing || loading}
+                  className={`px-4 py-1 rounded-full text-sm font-medium transition duration-200 ${
+>>>>>>> main
                     isProcessing 
                       ? "bg-gray-200 text-gray-500"
                       : isFollowing
@@ -143,7 +169,11 @@ const SuggestedUsers = () => {
                   ) : (
                     "Follow"
                   )}
+<<<<<<< HEAD
                 </p>
+=======
+                </button>
+>>>>>>> main
               </Tooltip>
             </div>
           );

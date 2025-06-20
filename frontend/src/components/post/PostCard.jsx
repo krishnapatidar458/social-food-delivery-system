@@ -1,8 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
+<<<<<<< HEAD
 import { FiHeart, FiMessageCircle, FiSend, FiBookmark, FiShare, FiMapPin, FiNavigation, FiMap } from "react-icons/fi";
 import { FcLike } from "react-icons/fc";
 import { Star, StarBorder, StarHalf } from "@mui/icons-material";
 import { Avatar, Badge, Menu, MenuItem, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Button, Rating, TextField, Box, Typography, CircularProgress, Grid } from "@mui/material";
+=======
+import { FiHeart, FiMessageCircle, FiSend, FiBookmark, FiShare } from "react-icons/fi";
+import { FcLike } from "react-icons/fc";
+import { Avatar, Badge, Menu, MenuItem } from "@mui/material";
+>>>>>>> main
 import CommentDialog from "../comment/CommentDialog";
 import ShareDialog from "../share/ShareDialog";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,6 +23,7 @@ import {
   removeFromCart,
 } from "../../redux/cartSlice";
 import { addNotification } from "../../redux/rtnSlice";
+<<<<<<< HEAD
 import { updateBookmarks, syncUserBookmarks } from "../../redux/authSlice";
 import useCart from "../../hooks/useCart";
 
@@ -475,6 +482,21 @@ const PostCard = ({ post }) => {
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [ratingDetailsOpen, setRatingDetailsOpen] = useState(false);
   const [loadingRating, setLoadingRating] = useState(false);
+=======
+import { updateBookmarks } from "../../redux/authSlice";
+
+const PostCard = ({ post }) => {
+  const { user } = useSelector((store) => store.auth);
+  const [liked, setLiked] = useState(post.likes.includes(user?._id));
+  const [likeCount, setLikeCount] = useState(post.likes.length);
+  const [shareCount, setShareCount] = useState(post.shareCount || 0);
+  const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState(post.comments);
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [bookmarked, setBookmarked] = useState(user?.bookmarks?.includes(post._id));
+>>>>>>> main
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -493,6 +515,7 @@ const PostCard = ({ post }) => {
   } = useCart();
 
   const { posts } = useSelector((store) => store.post);
+<<<<<<< HEAD
   
   // Monitor stock errors to show toast notifications
   useEffect(() => {
@@ -501,9 +524,49 @@ const PostCard = ({ post }) => {
     const postStockError = getStockError(post._id);
     if (postStockError) {
       toast.warning(postStockError);
+=======
+  const { cartItems } = useSelector((store) => store.cart);
+
+  // Check if post is in user's bookmarks when component mounts
+  useEffect(() => {
+    if (user && user.bookmarks) {
+      setBookmarked(user.bookmarks.includes(post._id));
+    }
+  }, [user, post._id]);
+
+  const handleLike = async () => {
+    try {
+      const action = liked ? "dislike" : "like";
+      const res = await axios.get(
+        `http://localhost:8000/api/v1/post/${post._id}/${action}`,
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        const updatedLikes = liked
+          ? post.likes.filter((id) => id !== user._id)
+          : [...post.likes, user._id];
+
+        const updatedPosts = posts.map((p) =>
+          p._id === post._id ? { ...p, likes: updatedLikes } : p
+        );
+
+        dispatch(setPosts(updatedPosts));
+
+        setLiked(!liked);
+        
+        setLikeCount(updatedLikes.length);
+                // Server will handle notifications via socket
+        
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Error updating like.");
+>>>>>>> main
     }
   }, [stockErrors, post?._id, getStockError]);
 
+<<<<<<< HEAD
   // Check if post is in user's bookmarks when component mounts
   useEffect(() => {
     if (!user || !user.bookmarks || !Array.isArray(user.bookmarks) || !post || !post._id) return;
@@ -805,10 +868,67 @@ const PostCard = ({ post }) => {
       const action = liked ? "dislike" : "like";
       const res = await axios.get(
         `http://localhost:8000/api/v1/post/${post._id}/${action}`,
+=======
+  const handleComment = async () => {
+    if (!commentText.trim()) return;
+
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/v1/post/${post._id}/comment`,
+        { text: commentText },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+
+      if (res.data.success) {
+        const updatedComments = [...comments, res.data.comment];
+        setComments(updatedComments);
+        setCommentText("");
+
+        const updatedPosts = posts.map((p) =>
+          p._id === post._id ? { ...p, comments: updatedComments } : p
+        );
+        dispatch(setPosts(updatedPosts));
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Comment failed.");
+    }
+  };
+
+  const handleDeletePost = async () => {
+    try {
+      const res = await axios.delete(
+        `http://localhost:8000/api/v1/post/delete/${post._id}`,
         { withCredentials: true }
       );
 
       if (res.data.success) {
+        const updatedPosts = posts.filter((p) => p._id !== post._id);
+        dispatch(setPosts(updatedPosts));
+
+        // Remove from cart if present
+        dispatch(removeFromCart(post._id));
+
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Deletion failed.");
+    }
+  };
+
+  const handleBookmark = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8000/api/v1/post/${post._id}/bookmark`,
+>>>>>>> main
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+<<<<<<< HEAD
         const updatedLikes = liked
           ? post.likes.filter((id) => id !== user._id)
           : [...post.likes, user._id];
@@ -837,8 +957,20 @@ const PostCard = ({ post }) => {
     if (!post || !post._id) {
       toast.error("Cannot comment: missing post information");
       return;
+=======
+        setBookmarked(res.data.type === "saved");
+        toast.success(res.data.message);
+        
+        // Update bookmarks in the auth store
+        dispatch(updateBookmarks(post._id));
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Error updating bookmark.");
+>>>>>>> main
     }
+  };
 
+<<<<<<< HEAD
     try {
       const res = await axios.post(
         `http://localhost:8000/api/v1/post/${post._id}/comment`,
@@ -1054,6 +1186,35 @@ const PostCard = ({ post }) => {
       console.error("Animation error:", error);
       // Animation failure shouldn't affect cart functionality
     }
+=======
+  const handleShare = () => {
+    setShareDialogOpen(true);
+    handleMenuClose();
+  };
+
+  const handleShareSuccess = () => {
+    setShareCount(prevCount => prevCount + 1);
+    
+    // Update share count in posts state
+    const updatedPosts = posts.map((p) =>
+      p._id === post._id ? { ...p, shareCount: (p.shareCount || 0) + 1 } : p
+    );
+    dispatch(setPosts(updatedPosts));
+  };
+
+  const addToCartHandler = () => {
+    const cartItem = {
+      _id: post._id,
+      name: post.caption,
+      image: post.image,
+      quantity: post.quantity,
+      video: post.video,
+      price: post.price,
+    };
+
+    dispatch(addToCart(cartItem));
+    toast.success("Added to cart");
+>>>>>>> main
   };
 
   const handleMenuOpen = (e) => setMenuAnchor(e.currentTarget);
@@ -1063,6 +1224,7 @@ const PostCard = ({ post }) => {
     handleBookmark();
     handleMenuClose();
   };
+<<<<<<< HEAD
 
   const handleRatingClick = () => {
     setRatingDialogOpen(true);
@@ -1120,6 +1282,11 @@ const PostCard = ({ post }) => {
 
   return (
     <div id={`post-${post._id}`} className="relative bg-white rounded-lg shadow-sm overflow-hidden mb-4 w-full mx-auto max-w-full">
+=======
+
+  return (
+    <div className="relative bg-white rounded-lg shadow-sm overflow-hidden mb-4 w-full mx-auto max-w-full">
+>>>>>>> main
       <div className="flex items-center justify-between p-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <Link to={`/profile/${post.author?._id}`} className="rounded-full overflow-hidden border border-gray-100">
@@ -1147,7 +1314,13 @@ const PostCard = ({ post }) => {
             >
               {post.author.username}
             </h4>
+<<<<<<< HEAD
             {renderDistance()}
+=======
+            <p className="text-xs text-gray-500">
+              {post.location} • {post.distance} km
+            </p>
+>>>>>>> main
           </div>
         </div>
         <div>
@@ -1199,6 +1372,7 @@ const PostCard = ({ post }) => {
             {"⭐".repeat(post.ratings)}
           </p>
 
+<<<<<<< HEAD
           {isItemInCart(post._id) ? (
             <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-lg">
               <button
@@ -1227,6 +1401,38 @@ const PostCard = ({ post }) => {
             >
               Add ₹{parseFloat(post.price || 0).toFixed(2)}
             </button>
+=======
+          {post.quantity > 0 ? (
+            cartItems.some((item) => item._id === post._id) ? (
+              <div className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-lg">
+                <button
+                  onClick={() => dispatch(decreaseQuantity({ _id: post._id }))}
+                  className="bg-red-100 hover:bg-red-200 w-7 h-7 flex items-center justify-center rounded-md text-lg transition-colors"
+                >
+                  -
+                </button>
+                <span className="text-sm font-medium w-5 text-center">
+                  {cartItems.find((item) => item._id === post._id)?.quantity ||
+                    0}
+                </span>
+                <button
+                  onClick={() => dispatch(increaseQuantity({ _id: post._id }))}
+                  className="bg-green-100 hover:bg-green-200 w-7 h-7 flex items-center justify-center rounded-md text-lg transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={addToCartHandler}
+                className="px-3 py-1.5 text-sm bg-orange-50 text-orange-500 font-medium rounded-md hover:bg-orange-100 transition-colors"
+              >
+                Add ₹{post.price}
+              </button>
+            )
+          ) : (
+            <span className="text-gray-400 italic text-sm">Out of stock</span>
+>>>>>>> main
           )}
         </div>
 

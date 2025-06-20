@@ -6,7 +6,10 @@ import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/datauri.js";
 import { Post } from "../models/post.model.js";
 import { getReceiverSocketId, io } from "../socket/socket.js";
+<<<<<<< HEAD
 import generateToken from "../utils/generateToken.js";
+=======
+>>>>>>> main
 
 export const register = async (req, res) => {
   try {
@@ -469,6 +472,7 @@ export const getUserStats = async (req, res) => {
       success: false,
       message: "Error fetching user statistics"
     });
+<<<<<<< HEAD
   }
 };
 
@@ -767,5 +771,7 @@ export const getCurrentUserProfile = async (req, res) => {
       message: "Server error: " + error.message,
       success: false
     });
+=======
+>>>>>>> main
   }
 };

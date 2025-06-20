@@ -13,6 +13,7 @@ const io = new Server(server, {
   },
 });
 
+<<<<<<< HEAD
 // Maps to track different types of connections
 const userSocketMap = {}; // userId -> socketId
 const orderRooms = new Set(); // Set of active order room IDs
@@ -21,17 +22,28 @@ const deliveryAgentSocketMap = {}; // agentId -> socketId
 // Helper functions to get socket IDs
 export const getReceiverSocketId = (receiverId) => userSocketMap[receiverId];
 export const getAgentSocketId = (agentId) => deliveryAgentSocketMap[agentId];
+=======
+// Map to track online users: userId -> socketId
+const userSocketMap = {};
+
+// Helper function to get a user's socket ID
+export const getReceiverSocketId = (receiverId) => userSocketMap[receiverId];
+>>>>>>> main
 
 // Socket connection handling
 io.on("connection", (socket) => {
   // Extract user ID from query parameters
   const userId = socket.handshake.query.userId;
+<<<<<<< HEAD
   const isDeliveryAgent = socket.handshake.query.isDeliveryAgent === 'true';
   const agentId = socket.handshake.query.agentId;
+=======
+>>>>>>> main
   
   if (userId) {
     // Register the user as online
     userSocketMap[userId] = socket.id;
+<<<<<<< HEAD
     console.log(`User connected: userId=${userId}, socketId=${socket.id}, isDeliveryAgent=${isDeliveryAgent}`);
     
     // If this is a delivery agent, add to the delivery agent map
@@ -39,6 +51,9 @@ io.on("connection", (socket) => {
       deliveryAgentSocketMap[agentId] = socket.id;
       console.log(`Delivery agent connected: agentId=${agentId}, socketId=${socket.id}`);
     }
+=======
+    console.log(`User connected: userId=${userId}, socketId=${socket.id}`);
+>>>>>>> main
     
     // Broadcast updated online users list to all clients
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
@@ -70,6 +85,7 @@ io.on("connection", (socket) => {
       socket.broadcast.emit("notificationsRead", userId);
     });
     
+<<<<<<< HEAD
     // --- Delivery related socket events ---
     
     // Join an order room (for tracking delivery)
@@ -102,10 +118,13 @@ io.on("connection", (socket) => {
       console.log(`Location updated for order ${orderId}`);
     });
     
+=======
+>>>>>>> main
     // Handle disconnect
     socket.on("disconnect", () => {
       console.log(`User disconnected: userId=${userId}, socketId=${socket.id}`);
       delete userSocketMap[userId];
+<<<<<<< HEAD
       
       // If this was a delivery agent, remove them from the agent map
       if (isDeliveryAgent && agentId) {
@@ -113,6 +132,8 @@ io.on("connection", (socket) => {
         console.log(`Delivery agent disconnected: agentId=${agentId}`);
       }
       
+=======
+>>>>>>> main
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
     });
   }

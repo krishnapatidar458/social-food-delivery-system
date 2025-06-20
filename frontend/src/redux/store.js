@@ -18,9 +18,13 @@ import cartSlice from './cartSlice';
 import socketSlice from './socketSlice';
 import chatSlice from './chatSlice';
 import rtnSlice from "./rtnSlice"
+<<<<<<< HEAD
 import adminSlice from "./adminSlice";
 import deliverySlice from "./deliverySlice";
 import { createLogger } from 'redux-logger';
+=======
+
+>>>>>>> main
 
 // Create logger instance
 const logger = createLogger({
@@ -34,6 +38,7 @@ const persistConfig = {
   key: "root",
   storage,
   version: 1,
+<<<<<<< HEAD
   blacklist: ['socket', 'cart', 'delivery'], // Don't persist socket, cart, or delivery in root
 };
 
@@ -55,6 +60,29 @@ const deliveryPersistConfig = {
   key: 'delivery',
   storage,
   blacklist: ['isActionPending', 'actionError', 'isLocationUpdating', 'isNearbyOrdersLoading'], // Don't persist these transient states
+=======
+  // Don't persist socket state to avoid serialization issues
+  blacklist: ['socket'],
+};
+
+// Separate config for chat slice to properly handle the sensitive parts
+const chatPersistConfig = {
+  key: 'chat',
+  storage,
+  // Ensure we have proper structures on rehydration
+  migrate: (state) => {
+    // If the state is invalid or missing fields, return the default structure
+    if (!state || !state.unreadCounts) {
+      return {
+        ...state,
+        onlineUsers: state?.onlineUsers || [],
+        messages: state?.messages || [],
+        unreadCounts: {}
+      };
+    }
+    return state;
+  }
+>>>>>>> main
 };
 
 const rootReducer = combineReducers({
@@ -62,12 +90,19 @@ const rootReducer = combineReducers({
   post: postSlice,
   category: categorySlice,
   user: userSlice,
+<<<<<<< HEAD
   cart: persistReducer(cartPersistConfig, cartSlice),
   socket: socketSlice,
   chat: persistReducer(chatPersistConfig, chatSlice),
   realTimeNotification: rtnSlice,
   admin: adminSlice,
   delivery: persistReducer(deliveryPersistConfig, deliverySlice),
+=======
+  cart: cartSlice,
+  socket: socketSlice,
+  chat: persistReducer(chatPersistConfig, chatSlice),
+  realTimeNotification: rtnSlice,
+>>>>>>> main
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -85,7 +120,15 @@ const store = configureStore({
           PERSIST, 
           PURGE, 
           REGISTER,
+<<<<<<< HEAD
         ],
+=======
+          // Ignore socket connection actions
+          'socketio/setSocketConnected',
+        ],
+        // Ignore non-serializable data in these paths
+        ignoredPaths: ['socket'],
+>>>>>>> main
       },
     }).concat(logger),
   devTools: process.env.NODE_ENV !== 'production',

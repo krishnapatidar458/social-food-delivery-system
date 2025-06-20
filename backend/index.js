@@ -10,10 +10,14 @@ import storyRoute from "./routes/storyRoutes.js";
 import messageRoute from "./routes/message.route.js";
 import notificationRoute from "./routes/notification.route.js";
 import shareRoute from "./routes/share.route.js";
+<<<<<<< HEAD
 import orderRoute from "./routes/order.route.js";
 import categoryRoute from "./routes/category.route.js";
 import deliveryAgentRoute from "./routes/deliveryAgent.route.js";
 import { app, server, io } from "./socket/socket.js";
+=======
+import { app, server } from "./socket/socket.js";
+>>>>>>> main
 
 dotenv.config({});
 
@@ -40,9 +44,12 @@ app.use("/api/v1/message", messageRoute);
 app.use("/api/v1/story", storyRoute);
 app.use("/api/v1/notifications", notificationRoute);
 app.use("/api/v1/share", shareRoute);
+<<<<<<< HEAD
 app.use("/api/v1/orders", orderRoute);
 app.use("/api/v1/category", categoryRoute);
 app.use("/api/v1/delivery", deliveryAgentRoute);
+=======
+>>>>>>> main
 
 //Routes
 app.get("/", (req, res) => {

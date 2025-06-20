@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import React, { useState, useRef, useEffect } from "react";
 import { MapPin, Search, ShoppingCart, Filter, X, Clock, SortAsc, Star, ChevronDown, Tag, Percent } from "lucide-react";
 import { Avatar, Badge, Chip, Slider, FormControlLabel, Checkbox, Tooltip, Switch, Rating, Select, MenuItem, TextField, FormGroup, Collapse } from "@mui/material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+=======
+import React, { use } from "react";
+import { MapPin, Search, ShoppingCart } from "lucide-react";
+import { Avatar, Badge } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
+>>>>>>> main
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,6 +23,10 @@ const Header = () => {
   const location = useLocation();
   const { user } = useSelector((store) => store.auth);
   const { cartItems } = useSelector((store) => store.cart);
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
   const dispatch = useDispatch();
 
   // Search state
@@ -1070,12 +1081,20 @@ const Header = () => {
       {/* Right Section: Location and Buttons */}
       <div className="flex items-center gap-3 md:gap-6 flex-shrink-0">
         <div
+<<<<<<< HEAD
           className="flex items-center gap-2 text-gray-600 cart-icon"
           onClick={() => navigate("/cartPage")}
           data-testid="cart-icon-container"
         >
           <Badge badgeContent={cartItems?.length || 0} color="secondary">
             <ShoppingCart className="cursor-pointer" data-testid="ShoppingCartIcon" />
+=======
+          className="flex items-center gap-2 text-gray-600"
+          onClick={() => navigate("/cartPage")}
+        >
+          <Badge badgeContent={cartItems.length} color="secondary">
+            <ShoppingCart className="cursor-pointer" />
+>>>>>>> main
           </Badge>
         </div>
 

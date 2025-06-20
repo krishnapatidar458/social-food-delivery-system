@@ -3,15 +3,23 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+<<<<<<< HEAD
 import { CircularProgress, Box, IconButton, Button, Divider, Paper, Rating, Typography, LinearProgress } from '@mui/material';
 import { ArrowLeft, MessageCircle, Heart, Star } from 'lucide-react';
+=======
+import { CircularProgress, Box, IconButton, Button, Divider } from '@mui/material';
+import { ArrowLeft, MessageCircle, Heart } from 'lucide-react';
+>>>>>>> main
 import PostCard from './PostCard';
 import { setSelectedPost } from '../../redux/postSlice';
 import CommentDialog from '../comment/CommentDialog';
 
+<<<<<<< HEAD
 // API base URL from environment or default to localhost
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
+=======
+>>>>>>> main
 const PostDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -20,8 +28,11 @@ const PostDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+<<<<<<< HEAD
   const [ratings, setRatings] = useState(null);
   const [loadingRatings, setLoadingRatings] = useState(false);
+=======
+>>>>>>> main
   const { user } = useSelector((store) => store.auth);
   
   // Check if post exists in Redux store
@@ -54,7 +65,11 @@ const PostDetail = () => {
         setLoading(!post); // Only show loading if we don't have the post yet
         
         const response = await axios.get(
+<<<<<<< HEAD
           `${API_BASE_URL}/api/v1/post/${id}`, 
+=======
+          `http://localhost:8000/api/v1/post/${id}`, 
+>>>>>>> main
           { withCredentials: true }
         );
         
@@ -114,6 +129,7 @@ const PostDetail = () => {
     };
   }, [id, dispatch]);
 
+<<<<<<< HEAD
   // Fetch ratings data
   useEffect(() => {
     const fetchRatings = async () => {
@@ -139,6 +155,8 @@ const PostDetail = () => {
     fetchRatings();
   }, [id, post]);
 
+=======
+>>>>>>> main
   const openComments = () => {
     if (post) {
       dispatch(setSelectedPost(post));
@@ -146,6 +164,7 @@ const PostDetail = () => {
     }
   };
 
+<<<<<<< HEAD
   // Calculate percentage for star rating distribution
   const calculatePercentage = (count) => {
     if (!ratings || !ratings.count || ratings.count === 0) return 0;
@@ -232,6 +251,8 @@ const PostDetail = () => {
     );
   };
 
+=======
+>>>>>>> main
   // Debug render state
   console.log("Render state:", { loading, error, hasPost: !!post });
 
@@ -264,6 +285,7 @@ const PostDetail = () => {
         <>
           <PostCard post={post} />
           
+<<<<<<< HEAD
           {/* Ratings Summary Section */}
           <Paper elevation={1} sx={{ p: 3, mt: 3, borderRadius: 2 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
@@ -283,6 +305,8 @@ const PostDetail = () => {
             {renderRatingsSummary()}
           </Paper>
           
+=======
+>>>>>>> main
           {/* Extra interaction section */}
           <div className="bg-white rounded-xl shadow-lg p-4 mt-4">
             <div className="flex justify-between items-center mb-4">
@@ -333,6 +357,7 @@ const PostDetail = () => {
       ) : (
         <div className="p-4 bg-gray-100 rounded-md">
           Post not found
+<<<<<<< HEAD
         </div>
       )}
 
@@ -341,6 +366,27 @@ const PostDetail = () => {
         setOpen={setCommentDialogOpen}
         post={post}
       />
+=======
+          <Button 
+            variant="text" 
+            color="primary" 
+            onClick={() => navigate(-1)}
+            className="mt-2 block"
+          >
+            Go Back
+          </Button>
+        </div>
+      )}
+      
+      {/* Comment dialog */}
+      {post && (
+        <CommentDialog
+          open={commentDialogOpen}
+          setOpen={setCommentDialogOpen}
+          post={post}
+        />
+      )}
+>>>>>>> main
     </div>
   );
 };

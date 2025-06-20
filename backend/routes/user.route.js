@@ -33,6 +33,7 @@ router.route("/suggested").get(isAuthenticated, getSuggestedUsers);
 router.route("/followorunfollow/:id").post(isAuthenticated, followOrUnfollow);
 router.route("/followings").get(isAuthenticated, getFollowings);
 router.route("/stats/:id").get(isAuthenticated, getUserStats);
+<<<<<<< HEAD
 router.post("/location", isAuthenticated, updateUserLocation);
 router.get("/nearby", isAuthenticated, findNearbyUsers);
 router.get("/search", isAuthenticated, searchUsers);
@@ -283,5 +284,7 @@ router.route("/admin/:userId/unblock").put(isAuthenticated, verifyAdmin, async (
     });
   }
 });
+=======
+>>>>>>> main
 
 export default router;

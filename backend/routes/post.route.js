@@ -9,12 +9,16 @@ import {
   getCommentsOfPost,
   getUserPost,
   likePost,
+<<<<<<< HEAD
   getSinglePost,
   findNearbyPosts,
   searchPosts,
   ratePost,
   getPostRatings,
   getBookmarkedPosts
+=======
+  getSinglePost
+>>>>>>> main
 } from "../controllers/post.controller.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js";
 import upload from "../middlewares/multer.js";

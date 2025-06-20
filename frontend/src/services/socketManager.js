@@ -1,5 +1,6 @@
 import { io } from "socket.io-client";
 
+<<<<<<< HEAD
 // Socket event constants
 export const SOCKET_EVENTS = {
   // Chat events
@@ -17,6 +18,8 @@ export const SOCKET_EVENTS = {
   DELIVERY_COMPLETED: "delivery_completed"
 };
 
+=======
+>>>>>>> main
 // Singleton socket instance
 let socket = null;
 

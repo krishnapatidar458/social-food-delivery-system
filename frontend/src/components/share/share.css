@@ -1,5 +1,6 @@
 /* Share dialog styling */
 
+<<<<<<< HEAD
 .share-dialog .MuiDialog-paper {
   border-radius: 16px;
   overflow: hidden;
@@ -30,6 +31,21 @@
 
 .share-dialog-content {
   padding: 24px;
+=======
+.share-dialog .MuiDialogTitle-root {
+  padding: 16px 24px;
+}
+
+.share-tabs .MuiTab-root {
+  min-width: 80px;
+  padding: 12px 16px;
+  text-transform: none;
+}
+
+.share-tabs .MuiTabs-indicator {
+  background-color: #f97316;
+  height: 3px;
+>>>>>>> main
 }
 
 .user-list .MuiListItem-root:hover {
@@ -43,6 +59,7 @@
 .share-button {
   text-transform: none !important;
   border-radius: 8px !important;
+<<<<<<< HEAD
   padding: 8px 16px !important;
   box-shadow: none !important;
 }
@@ -52,14 +69,45 @@
   border-color: rgba(29, 161, 242, 0.5) !important;
 }
 
+=======
+  transition: all 0.2s ease-in-out !important;
+}
+
+.share-button.twitter {
+  color: #1da1f2 !important;
+  border-color: rgba(29, 161, 242, 0.5) !important;
+}
+
+.share-button.twitter:hover {
+  background-color: rgba(29, 161, 242, 0.1) !important;
+  border-color: #1da1f2 !important;
+}
+
+>>>>>>> main
 .share-button.facebook {
   color: #4267B2 !important;
   border-color: rgba(66, 103, 178, 0.5) !important;
 }
 
+<<<<<<< HEAD
 .share-button.whatsapp {
   color: #25D366 !important;
   border-color: rgba(37, 211, 102, 0.5) !important;
+=======
+.share-button.facebook:hover {
+  background-color: rgba(66, 103, 178, 0.1) !important;
+  border-color: #4267B2 !important;
+}
+
+.share-button.whatsapp {
+  color: #4ECB5C !important;
+  border-color: rgba(78, 203, 92, 0.5) !important;
+}
+
+.share-button.whatsapp:hover {
+  background-color: rgba(78, 203, 92, 0.1) !important;
+  border-color: #4ECB5C !important;
+>>>>>>> main
 }
 
 .share-button.telegram {
@@ -67,6 +115,7 @@
   border-color: rgba(0, 136, 204, 0.5) !important;
 }
 
+<<<<<<< HEAD
 .share-button.email {
   color: #EA4335 !important;
   border-color: rgba(234, 67, 53, 0.5) !important;
@@ -80,6 +129,45 @@
 .share-chip {
   margin-right: 8px;
   margin-bottom: 8px;
+=======
+.share-button.telegram:hover {
+  background-color: rgba(0, 136, 204, 0.1) !important;
+  border-color: #0088cc !important;
+}
+
+.share-button.email {
+  color: #BB001B !important;
+  border-color: rgba(187, 0, 27, 0.5) !important;
+}
+
+.share-button.email:hover {
+  background-color: rgba(187, 0, 27, 0.1) !important;
+  border-color: #BB001B !important;
+}
+
+.share-button.sms {
+  color: #7D3AC1 !important;
+  border-color: rgba(125, 58, 193, 0.5) !important;
+}
+
+.share-button.sms:hover {
+  background-color: rgba(125, 58, 193, 0.1) !important;
+  border-color: #7D3AC1 !important;
+}
+
+.share-chip {
+  border-color: #f97316 !important;
+  color: #f97316 !important;
+  padding: 8px 12px !important;
+  height: 36px !important;
+  border-radius: 18px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.share-chip:hover {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+>>>>>>> main
 }
 
 /* Animation for success state */
@@ -110,6 +198,7 @@
 }
 
 /* Success animation */
+<<<<<<< HEAD
 @keyframes successPulse {
   0% { transform: scale(0.8); opacity: 0.3; }
   50% { transform: scale(1.1); opacity: 1; }
@@ -129,10 +218,41 @@
 
 .animated-icon {
   animation: float 3s ease-in-out infinite;
+=======
+.success-icon {
+  animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* Animated icon */
+.animated-icon {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+  }
+>>>>>>> main
 }
 
 /* Preview container styles */
 .preview-container {
+<<<<<<< HEAD
   min-height: 400px;
   display: flex;
   flex-direction: column;
@@ -140,6 +260,15 @@
 
 .share-preview {
   flex: 1;
+=======
+  transition: all 0.3s ease;
+  min-height: 400px;
+  overflow: hidden;
+}
+
+.share-preview {
+  transition: all 0.3s ease;
+>>>>>>> main
 }
 
 /* Tab transition effects */
@@ -201,6 +330,7 @@
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
+<<<<<<< HEAD
 /* QR Code animation */
 @keyframes fadeInUp {
   from {
@@ -217,6 +347,8 @@
   animation: fadeInUp 0.5s ease-out;
 }
 
+=======
+>>>>>>> main
 /* Responsive styling */
 @media (max-width: 600px) {
   .share-dialog .MuiDialogTitle-root {
@@ -237,6 +369,7 @@
   .share-dialog-content {
     max-height: 80vh;
   }
+<<<<<<< HEAD
 }
 
 /* Add to cart animation styles */
@@ -302,4 +435,6 @@ button:disabled {
 
 .quantity-changed {
   animation: quantityChange 0.3s ease-out;
+=======
+>>>>>>> main
 } 
