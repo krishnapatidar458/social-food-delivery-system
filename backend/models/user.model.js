@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["male", "female"], //enum is used in case of options
     },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
     followers: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -58,8 +62,25 @@ const userSchema = new mongoose.Schema(
         ref: "Story",
       },
     ],
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number],
+        default: [0, 0],
+      },
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
   { timestamps: true }
 );
+
+userSchema.index({ location: '2dsphere' });
 
 export const User = mongoose.model("User", userSchema);

@@ -13,8 +13,14 @@ import ChatPage from "./components/chat/ChatPage";
 import { useDispatch, useSelector } from "react-redux";
 import { setOnlineUsers } from "./redux/chatSlice";
 import { addNotification, fetchNotifications } from "./redux/rtnSlice";
+<<<<<<< HEAD
+import { setSocketConnected, resetSocketState, addOrderStatusUpdate } from "./redux/socketSlice";
+import { fetchCurrentUserFollowings } from "./redux/userSlice";
+import { setCurrentUser, migrateCart, syncOrderStatus, fetchOrders } from "./redux/cartSlice";
+=======
 import { setSocketConnected, resetSocketState } from "./redux/socketSlice";
 import { fetchCurrentUserFollowings } from "./redux/userSlice";
+>>>>>>> main
 import { 
   initSocket, 
   closeSocket, 
@@ -24,6 +30,26 @@ import {
 } from "./services/socketManager";
 import PostDetail from "./components/post/PostDetail";
 import FavoritesPage from "./components/favorites/FavoritesPage";
+<<<<<<< HEAD
+import SharedPost from "./components/share/SharedPost";
+import OrdersPage from "./components/orders/OrdersPage";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./components/admin/AdminDashboard";
+import OrdersManagement from "./components/admin/OrdersManagement";
+import AdminCheck from "./pages/AdminCheck";
+import CategoriesManagement from "./components/admin/CategoriesManagement";
+import UsersManagement from "./components/admin/UsersManagement";
+import { toast } from "react-hot-toast";
+import DeliveryLayout from "./components/delivery/DeliveryLayout";
+import Dashboard from "./components/delivery/Dashboard";
+import Register from "./components/delivery/Register";
+import NearbyOrders from "./components/delivery/NearbyOrders";
+import MyDeliveries from "./components/delivery/MyDeliveries";
+import DeliveryHistory from "./components/delivery/DeliveryHistory";
+import DeliveryProfile from "./components/delivery/Profile";
+import DeliveryAgentsManagement from "./components/admin/DeliveryAgentsManagement";
+=======
+>>>>>>> main
 
 const browserRouter = createBrowserRouter([
   {
@@ -46,6 +72,13 @@ const browserRouter = createBrowserRouter([
         path: "/favorites",
         element: <FavoritesPage />,
       },
+<<<<<<< HEAD
+      {
+        path: "/orders/*",
+        element: <OrdersPage />,
+      },
+=======
+>>>>>>> main
     ],
   },
   {
@@ -78,6 +111,80 @@ const browserRouter = createBrowserRouter([
       },
     ],
   },
+<<<<<<< HEAD
+  {
+    path: "/shared/:shareId",
+    element: <SharedPost />,
+  },
+  // Admin Routes
+  {
+    path: "/admin",
+    element: <AdminLayout />,
+    children: [
+      {
+        path: "dashboard",
+        element: <AdminDashboard />,
+      },
+      {
+        path: "orders",
+        element: <OrdersManagement />,
+      },
+      {
+        path: "categories",
+        element: <CategoriesManagement />,
+      },
+      {
+        path: "users",
+        element: <UsersManagement />,
+      },
+      {
+        path: "delivery-agents",
+        element: <DeliveryAgentsManagement />,
+      },
+      {
+        path: "check",
+        element: <AdminCheck />,
+      },
+    ],
+  },
+  // Admin debug route
+  {
+    path: "/admin-check",
+    element: <AdminCheck />,
+  },
+  // Delivery Routes
+  {
+    path: "/deliver",
+    element: <DeliveryLayout />,
+    children: [
+      {
+        path: "dashboard",
+        element: <Dashboard />,
+      },
+      {
+        path: "register",
+        element: <Register />,
+      },
+      {
+        path: "nearby-orders",
+        element: <NearbyOrders />,
+      },
+      {
+        path: "my-deliveries",
+        element: <MyDeliveries />,
+      },
+      {
+        path: "history",
+        element: <DeliveryHistory />,
+      },
+      {
+        path: "profile",
+        element: <DeliveryProfile />,
+      },
+    ],
+  },
+=======
+>>>>>>> main
 ]);
 
 const App = () => {
@@ -86,6 +193,29 @@ const App = () => {
   const { unreadCounts } = useSelector((store) => store.chat); 
   const dispatch = useDispatch();
   
+<<<<<<< HEAD
+  // Initialize user-specific cart when user logs in or out
+  useEffect(() => {
+    // Set current user ID for cart (or null if logged out)
+    const userId = user?._id || null;
+    console.log("Setting current user ID in cart state:", userId);
+    dispatch(setCurrentUser(userId));
+    
+    // If user is logged in, migrate any existing cart items to their user-specific cart
+    if (userId) {
+      dispatch(migrateCart(userId));
+      
+      // Force fetch orders when user changes (clear any previous user's orders)
+      dispatch({ type: 'cart/orders/reset' });
+      dispatch(fetchOrders());
+    } else {
+      // Clear orders when user logs out
+      dispatch({ type: 'cart/orders/reset' });
+    }
+  }, [user?._id, dispatch]);
+  
+=======
+>>>>>>> main
   // Detect and fix corrupted chat state
   useEffect(() => {
     // Check if unreadCounts is undefined, which indicates a corrupted state
@@ -189,6 +319,52 @@ const App = () => {
           // Register notification handlers
           onEvent('notification', handleNotification);
           onEvent('newNotification', handleNotification);
+<<<<<<< HEAD
+
+          // Register order status update handler
+          onEvent('order_status_update', (data) => {
+            console.log('Order status update received:', data);
+            
+            // Make sure data has the required fields
+            if (!data || !data.orderId) {
+              console.error('Invalid order status update received:', data);
+              return;
+            }
+            
+            // Add timestamp if not present
+            const orderUpdate = {
+              ...data,
+              timestamp: data.timestamp || new Date().toISOString()
+            };
+            
+            // Add to order status updates in socket slice
+            dispatch(addOrderStatusUpdate(orderUpdate));
+            
+            // Synchronize order status in user's order history
+            if (orderUpdate.orderId && orderUpdate.status) {
+              console.log('Dispatching syncOrderStatus with:', orderUpdate);
+              
+              dispatch(syncOrderStatus({
+                orderId: orderUpdate.orderId,
+                status: orderUpdate.status,
+                paymentStatus: orderUpdate.paymentStatus
+              }));
+              
+              // Show notification for order updates with better formatting
+              const formattedStatus = orderUpdate.status.replace(/_/g, ' ').toUpperCase();
+              const orderId = orderUpdate.orderId.substring(0, 8);
+              
+              toast.info(
+                `Order #${orderId}... status updated to ${formattedStatus}`,
+                {
+                  position: "bottom-right",
+                  autoClose: 5000
+                }
+              );
+            }
+          });
+=======
+>>>>>>> main
         }
 
         return () => {
@@ -199,6 +375,10 @@ const App = () => {
           offEvent('getOnlineUsers');
           offEvent('notification');
           offEvent('newNotification');
+<<<<<<< HEAD
+          offEvent('order_status_update');
+=======
+>>>>>>> main
           
           closeSocket();
           dispatch(resetSocketState());

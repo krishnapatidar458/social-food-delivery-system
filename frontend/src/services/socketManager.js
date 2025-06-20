@@ -1,5 +1,25 @@
 import { io } from "socket.io-client";
 
+<<<<<<< HEAD
+// Socket event constants
+export const SOCKET_EVENTS = {
+  // Chat events
+  NEW_MESSAGE: "new_message",
+  MESSAGE_RECEIVED: "message_received",
+  
+  // Notification events
+  NEW_NOTIFICATION: "new_notification",
+  
+  // Delivery events
+  ORDER_ASSIGNED: "order_assigned",
+  ORDER_STATUS_UPDATED: "order_status_updated",
+  DELIVERY_LOCATION_UPDATED: "delivery_location_updated",
+  NEW_ORDER_AVAILABLE: "new_order_available",
+  DELIVERY_COMPLETED: "delivery_completed"
+};
+
+=======
+>>>>>>> main
 // Singleton socket instance
 let socket = null;
 

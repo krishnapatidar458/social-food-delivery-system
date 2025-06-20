@@ -6,6 +6,10 @@ import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/datauri.js";
 import { Post } from "../models/post.model.js";
 import { getReceiverSocketId, io } from "../socket/socket.js";
+<<<<<<< HEAD
+import generateToken from "../utils/generateToken.js";
+=======
+>>>>>>> main
 
 export const register = async (req, res) => {
   try {
@@ -110,6 +114,8 @@ export const login = async (req, res) => {
       followers: user.followers,
       followings: user.followings,
       posts: populatedPosts.filter(Boolean), // filters out nulls
+      bookmarks: user.bookmarks || [],
+      isAdmin: user.isAdmin || false,
     };
 
     return res
@@ -141,16 +147,51 @@ export const logout = async (req, res) => {
 export const getProfile = async (req, res) => {
   try {
     const userId = req.params.id;
+    
+    // Check if userId is undefined or not a valid ObjectId
+    if (!userId || userId === 'undefined' || userId === 'null') {
+      return res.status(400).json({
+        message: "Invalid user ID provided",
+        success: false
+      });
+    }
+    
+    // Try to validate MongoDB ObjectId format
+    if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        message: "Invalid user ID format",
+        success: false
+      });
+    }
+    
     let user = await User.findById(userId)
       .populate({ path: "posts", createdAt: -1 })
       .populate("bookmarks");
-    console.log(user);
+    
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false
+      });
+    }
+    
+    // Make sure isAdmin field is included in the response
+    const userData = {
+      ...user.toObject(),
+      isAdmin: user.isAdmin || false
+    };
+    
+    console.log(userData);
     return res.status(200).json({
-      user,
+      user: userData,
       success: true,
     });
   } catch (error) {
     console.log(error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false
+    });
   }
 };
 
@@ -431,5 +472,306 @@ export const getUserStats = async (req, res) => {
       success: false,
       message: "Error fetching user statistics"
     });
+<<<<<<< HEAD
+  }
+};
+
+export const updateUserLocation = async (req, res) => {
+  try {
+    const userId = req.id;
+    const { longitude, latitude } = req.body;
+
+    if (!longitude || !latitude) {
+      return res.status(400).json({
+        success: false,
+        message: "Longitude and latitude are required",
+      });
+    }
+
+    // Validate coordinates
+    const lon = parseFloat(longitude);
+    const lat = parseFloat(latitude);
+    
+    if (isNaN(lon) || isNaN(lat)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid coordinates format",
+      });
+    }
+    
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+      return res.status(400).json({
+        success: false,
+        message: "Coordinates out of valid range",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Update user location
+    user.location = {
+      type: 'Point',
+      coordinates: [lon, lat],
+    };
+
+    await user.save();
+
+    // Return the updated user data without sensitive fields
+    const updatedUser = await User.findById(userId).select("-password");
+
+    return res.status(200).json({
+      success: true,
+      message: "Location updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Update location error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating location: " + error.message,
+    });
+  }
+};
+
+export const findNearbyUsers = async (req, res) => {
+  try {
+    const userId = req.id;
+    const { longitude, latitude, maxDistance = 10000 } = req.query; // maxDistance in meters
+
+    if (!longitude || !latitude) {
+      return res.status(400).json({
+        success: false,
+        message: "Longitude and latitude are required",
+      });
+    }
+
+    const nearbyUsers = await User.find({
+      _id: { $ne: userId },
+      location: {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [parseFloat(longitude), parseFloat(latitude)],
+          },
+          $maxDistance: parseInt(maxDistance),
+        },
+      },
+    }).select('-password');
+
+    return res.status(200).json({
+      success: true,
+      users: nearbyUsers,
+    });
+  } catch (error) {
+    console.error("Find nearby users error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while finding nearby users: " + error.message,
+    });
+  }
+};
+
+export const searchUsers = async (req, res) => {
+  try {
+    const { q, page = 1, limit = 10 } = req.query;
+    
+    // Return empty result if no query
+    if (!q) {
+      return res.status(200).json({ 
+        success: true, 
+        users: [],
+        pagination: {
+          total: 0,
+          page: Number(page),
+          limit: Number(limit),
+          pages: 0
+        },
+        hasMore: false
+      });
+    }
+    
+    // Build search filter
+    const filter = {
+      $or: [
+        { username: { $regex: q, $options: "i" } },
+        { bio: { $regex: q, $options: "i" } }
+      ]
+    };
+    
+    // Calculate pagination
+    const skip = (Number(page) - 1) * Number(limit);
+    
+    // Execute query with pagination
+    const [users, totalCount] = await Promise.all([
+      User.find(filter)
+        .select("_id username profilePicture bio followers followings location")
+        .sort({ username: 1 })
+        .skip(skip)
+        .limit(Number(limit)),
+      User.countDocuments(filter)
+    ]);
+    
+    // Calculate if there are more results
+    const hasMore = totalCount > skip + users.length;
+    
+    return res.status(200).json({ 
+      success: true, 
+      users,
+      pagination: {
+        total: totalCount,
+        page: Number(page),
+        limit: Number(limit),
+        pages: Math.ceil(totalCount / Number(limit))
+      },
+      hasMore
+    });
+  } catch (error) {
+    console.error("User search error:", error);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Server error: " + error.message 
+    });
+  }
+};
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    // Get userId from authenticated user
+    const userId = req.id;
+    
+    // Check if userId is valid
+    if (!userId) {
+      return res.status(401).json({
+        message: "Authentication required",
+        success: false
+      });
+    }
+    
+    // Try to validate MongoDB ObjectId format
+    if (typeof userId === 'string' && !userId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        message: "Invalid user ID format",
+        success: false
+      });
+    }
+    
+    const user = await User.findById(userId).select("-password");
+    
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false
+      });
+    }
+    
+    // Include isAdmin field
+    const userData = {
+      ...user.toObject(),
+      isAdmin: user.isAdmin || false
+    };
+    
+    return res.status(200).json({
+      success: true,
+      user: userData
+    });
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false
+    });
+  }
+};
+
+// Get current user profile
+export const getCurrentUserProfile = async (req, res) => {
+  try {
+    // Get the user ID from the request (set by the authentication middleware)
+    const userId = req.id;
+    
+    if (!userId) {
+      return res.status(401).json({
+        message: "Authentication required",
+        success: false
+      });
+    }
+    
+    // Find the user but don't populate bookmarks yet
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false
+      });
+    }
+    
+    // Initialize arrays if they don't exist
+    if (!user.bookmarks) {
+      user.bookmarks = [];
+      await user.save();
+    }
+    
+    if (!user.posts) {
+      user.posts = [];
+      await user.save();
+    }
+    
+    // Load only valid bookmark IDs (optional validation)
+    let bookmarkIds = user.bookmarks;
+    
+    // Check if bookmark posts still exist (optional)
+    if (bookmarkIds.length > 0) {
+      try {
+        const existingPosts = await Post.find({ 
+          _id: { $in: bookmarkIds } 
+        }).select('_id');
+        
+        const validBookmarkIds = existingPosts.map(post => post._id.toString());
+        
+        // If some bookmarks are invalid (deleted posts), update user
+        if (validBookmarkIds.length < bookmarkIds.length) {
+          console.log(`Removing ${bookmarkIds.length - validBookmarkIds.length} invalid bookmarks for user ${userId}`);
+          user.bookmarks = validBookmarkIds;
+          await user.save();
+          bookmarkIds = validBookmarkIds;
+        }
+      } catch (bookmarkError) {
+        console.warn("Error validating bookmarks:", bookmarkError);
+        // Continue with original bookmarks if validation fails
+      }
+    }
+    
+    // Return the user data
+    return res.status(200).json({
+      success: true,
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        profilePicture: user.profilePicture,
+        bio: user.bio,
+        followers: user.followers || [],
+        followings: user.followings || [],
+        posts: user.posts || [],
+        bookmarks: bookmarkIds || [],
+        isAdmin: user.isAdmin || false,
+        location: user.location
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching current user profile:", error);
+    return res.status(500).json({
+      message: "Server error: " + error.message,
+      success: false
+    });
+=======
+>>>>>>> main
   }
 };
